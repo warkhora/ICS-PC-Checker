@@ -2,1592 +2,176 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ICS Premium Comparison</title>
-
-<style>
-  body {
-    margin: 0;
-    padding: 40px;
-    background: radial-gradient(circle at top, #101010, #000);
-    color: #e6e6e6;
-    font-family: "Segoe UI", system-ui, sans-serif;
-  }
-
-  .ics-container {
-    max-width: 1100px;
-    margin: auto;
-  }
-
-  .ics-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .ics-logo {
-    font-size: 26px;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: gold;
-  }
-
-  .ics-subtitle {
-    color: #aaa;
-    margin-top: 8px;
-    font-size: 14px;
-  }
-
-  .ics-frame {
-    background: linear-gradient(135deg, rgba(25,25,25,0.9), rgba(10,10,10,0.9));
-    border: 1px solid #333;
-    padding: 20px;
-    margin-bottom: 25px;
-    border-radius: 14px;
-    transition: 0.3s ease;
-    backdrop-filter: blur(6px);
-  }
-
-  .ics-frame:hover {
-    border-color: gold;
-    box-shadow: 0 0 22px rgba(255, 215, 0, 0.55);
-    transform: translateY(-2px);
-  }
-
-  h1, h2 {
-    font-weight: 600;
-    letter-spacing: 1px;
-    color: #f5f5f5;
-    margin-top: 0;
-  }
-
-  p {
-    color: #b5b5b5;
-    font-size: 14px;
-  }
-
-  .selectors {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-  }
-
-  select, button {
-    background: #111;
-    color: #eee;
-    border: 1px solid #444;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin: 5px 0;
-    transition: 0.2s;
-    font-size: 14px;
-  }
-
-  select:hover, button:hover {
-    border-color: gold;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
-  }
-
-  button {
-    cursor: pointer;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    font-size: 14px;
-  }
-
-  th {
-    background: #111;
-    padding: 12px;
-    border-bottom: 2px solid #333;
-    text-align: left;
-    color: #f0f0f0;
-  }
-
-  td {
-    padding: 10px;
-    border-bottom: 1px solid #222;
-    color: #ddd;
-  }
-
-  tr:nth-child(even) td {
-    background: rgba(255,255,255,0.01);
-  }
-
-  .spec-label {
-    font-weight: 600;
-    color: #f0f0f0;
-    width: 190px;
-    white-space: nowrap;
-  }
-
-  .product-type {
-    font-size: 12px;
-    text-transform: uppercase;
-    color: #ffdd88;
-  }
-
-  .note {
-    font-size: 12px;
-    color: #888;
-    margin-top: 6px;
-  }
-</style>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CPU &amp; GPU Comparison — PCFORGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/theme.css">
 </head>
 <body>
 
-<!-- ICS NAVIGATION BAR -->
-<div class="ics-nav">
-  <a href="index.html" class="nav-link" data-page="index">CPU/GPU Comparison</a>
-  <a href="fps.html" class="nav-link" data-page="fps">FPS Estimator</a>
-  <a href="canyourunit.html" class="nav-link" data-page="canyourunit">Can You Run It?</a>
-  <a href="build.html" class="nav-link" data-page="build">Build Your PC</a>
-  <a href="pclifetime.html" class="nav-link" data-page="pclifetime">PC Lifespan</a>
-  <a href="thermals.html" class="nav-link" data-page="thermals">Thermal & Cooling</a>
-  <a href="consumption.html" class="nav-link" data-page="consumption">Power Consumption</a>
-  <a href="storage.html" class="nav-link" data-page="storage">Storage & Load Times</a>
+<div class="pf-container">
 
-  <!-- ▼ NEW DROPDOWN BUTTON (INSIDE NAV!) -->
-  <div class="nav-more">
-    <span class="nav-more-btn">More ▼</span>
-    <div class="nav-more-menu">
-      <a href="bottleneck.html">Bottleneck Analyzer</a>
-      <a href="future1.html">Future Tool 1</a>
-      <a href="future2.html">Future Tool 2</a>
-      <a href="future3.html">Future Tool 3</a>
+  <header class="pf-hero">
+    <div class="pf-eyebrow">● <span id="dbCount"></span> real components</div>
+    <h1>Hardware Comparison</h1>
+    <p>Put up to three CPUs or GPUs side by side — full spec sheets plus a normalised
+       performance bar so you can see the gap at a glance. Every entry is a real,
+       purchasable part.</p>
+  </header>
+
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">⚖</span> Pick your parts</h2>
+    <div class="pf-grid pf-grid-2" style="margin-bottom:14px;">
+      <div>
+        <label class="pf-label" for="kind">Compare</label>
+        <select id="kind">
+          <option value="cpu">Processors</option>
+          <option value="gpu">Graphics cards</option>
+        </select>
+      </div>
+      <div>
+        <label class="pf-label" for="search">Filter by name, family or architecture</label>
+        <input type="text" id="search" placeholder="e.g. 5070, Zen 5, Blackwell…">
+      </div>
     </div>
-  </div>
-</div>
-
-<style>
-  .ics-nav {
-    width: 100%;
-    background: rgba(0,0,0,0.65);
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    padding: 16px 24px;
-    display: flex;
-    gap: 30px;
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    backdrop-filter: blur(12px);
-    margin: -40px -40px 40px -40px;
-  }
-
-  .ics-nav a {
-    color: #ffd700;
-    text-decoration: none;
-    font-size: 16px;
-    letter-spacing: 1px;
-    transition: 0.25s ease;
-    padding-bottom: 4px;
-  }
-
-  .ics-nav a:hover {
-    color: white;
-    text-shadow: 0 0 10px #ffd700;
-  }
-
-  .ics-nav a.active {
-    color: white;
-    border-bottom: 2px solid #ffd700;
-    text-shadow: 0 0 12px #ffd700;
-  }
-
-  /* ▼ MORE MENU DROPDOWN */
-.nav-more {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.nav-more-btn {
-  color: #ffd700;
-  cursor: pointer;
-  font-size: 16px;
-  letter-spacing: 1px;
-  padding-bottom: 4px;
-  transition: 0.25s ease;
-}
-
-.nav-more-btn:hover {
-  color: white;
-  text-shadow: 0 0 10px #ffd700;
-}
-
-.nav-more-menu {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 14px;
-  padding: 10px;
-  width: 220px;
-  display: none;
-  flex-direction: column;
-  box-shadow: 0 0 25px rgba(255,215,0,0.15);
-  z-index: 9999;
-}
-
-.nav-more-menu a {
-  color: #ffd700;
-  text-decoration: none;
-  padding: 8px 10px;
-  border-radius: 10px;
-  transition: 0.25s ease;
-  display: block;
-  font-size: 14px;
-}
-
-.nav-more-menu a:hover {
-  background: rgba(255,255,255,0.08);
-  color: white;
-  text-shadow: 0 0 10px #ffd700;
-}
-</style>
-
-  <script>
-  const moreBtn = document.querySelector(".nav-more-btn");
-  const moreMenu = document.querySelector(".nav-more-menu");
-
-  moreBtn.addEventListener("click", () => {
-    moreMenu.style.display = moreMenu.style.display === "flex" ? "none" : "flex";
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".nav-more")) {
-      moreMenu.style.display = "none";
-    }
-  });
-</script>
-
-<script>
-  const current = window.location.pathname.split("/").pop().toLowerCase();
-  document.querySelectorAll(".nav-link").forEach(link => {
-    if (current.includes(link.getAttribute("data-page"))) {
-      link.classList.add("active");
-    }
-  });
-</script>
-
-
-<div class="ics-container">
-
-  <div class="ics-header">
-    <div class="ics-logo">ICS REGENT</div>
-    <div class="ics-subtitle">Premium CPU & GPU Comparison — Regent Dot, Ultra, RA5 & Real-World CPUs</div>
-  </div>
-
-  <div class="ics-frame">
-    <h1>ICS CPU/GPU Comparison</h1>
-    <p>Select up to three ICS or real-world processors/GPUs to compare side by side.</p>
-
-    <div class="selectors">
-      <select id="p1"></select>
-      <select id="p2"></select>
-      <select id="p3"></select>
-      <button onclick="compare()">Compare</button>
+    <div class="pf-grid pf-grid-3">
+      <div><label class="pf-label" for="p1">Slot 1</label><select id="p1"></select></div>
+      <div><label class="pf-label" for="p2">Slot 2</label><select id="p2"></select></div>
+      <div><label class="pf-label" for="p3">Slot 3 (optional)</label><select id="p3"></select></div>
     </div>
+    <button class="pf-btn" id="compare">Compare</button>
+  </section>
 
-    <p class="note">Tip: Compare ICS GX / SR / Flagship against Intel, AMD Ryzen and Apple M‑series.</p>
-  </div>
-
-  <div class="ics-frame">
-    <h2>Comparison Result</h2>
-    <table id="result"></table>
-  </div>
+  <section class="pf-card reveal" id="resultCard">
+    <h2><span class="ico">📊</span> Performance at a glance</h2>
+    <div id="perfChart"></div>
+    <div class="pf-note" id="perfNote"></div>
+    <div class="pf-section-title">Full specification</div>
+    <div class="pf-scroll"><table class="pf-table" id="result"></table></div>
+  </section>
 
 </div>
 
-<!-- ========================= -->
-<!--  SCRIPT PLACED AT BOTTOM  -->
-<!-- ========================= -->
-
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
 <script>
-const products = [
-  // ICS GX 7 / GX 9 gaming CPUs
-  {
-    name: "Regent GX 7-9650RX3",
-    type: "CPU",
-    family: "ICS GX Series",
-    segment: "High-Performance Gaming",
-    cores: "12C / 24T",
-    base: "4.7 GHz",
-    boost: "Up to 6.0 GHz",
-    cache: "112MB HyperCache X3",
-    arch: "Regent Dot",
-    socket: "LGA-1851",
-    tdp: "135W",
-    ai: "Single NMA",
-    mem: "DDR5-7800",
-    pcie: "PCIe 5.0, 24 lanes",
-    perf: "≈ Ryzen 7 7800X3D"
-  },
-  {
-    name: "Regent GX 7-9750RX3",
-    type: "CPU",
-    family: "ICS GX Series",
-    segment: "High-Performance Gaming",
-    cores: "14C / 28T",
-    base: "4.8 GHz",
-    boost: "Up to 6.2 GHz",
-    cache: "128MB HyperCache X3",
-    arch: "Regent Dot",
-    socket: "LGA-1851",
-    tdp: "150W",
-    ai: "Dual NMA",
-    mem: "DDR5-8200",
-    pcie: "PCIe 5.0, 28 lanes",
-    perf: "Between Ryzen 7 7800X3D and Ryzen 7 9700X"
-  },
-  {
-    name: "Regent GX 9-9850RX3",
-    type: "CPU",
-    family: "ICS GX Series",
-    segment: "Enthusiast Gaming",
-    cores: "16C / 32T",
-    base: "4.9 GHz",
-    boost: "Up to 6.3 GHz",
-    cache: "144MB HyperCache X3",
-    arch: "Regent Dot",
-    socket: "LGA-1851",
-    tdp: "170W",
-    ai: "Dual NMA-2",
-    mem: "DDR5-8400",
-    pcie: "PCIe 5.0, 32 lanes",
-    perf: "≈ Ryzen 7 9800X3D"
-  },
-  {
-    name: "Regent GX 9-9950RX3",
-    type: "CPU",
-    family: "ICS GX Series",
-    segment: "Enthusiast Gaming & Creation",
-    cores: "16C / 32T",
-    base: "5.0 GHz",
-    boost: "Up to 6.35 GHz",
-    cache: "160MB HyperCache X3",
-    arch: "Regent Dot (Enhanced)",
-    socket: "LGA-1851",
-    tdp: "185W",
-    ai: "Dual NMA-2",
-    mem: "DDR5-8600",
-    pcie: "PCIe 5.0, 32 lanes",
-    perf: "≈ Ryzen 9 9950X3D (stronger in gaming, similar multi-core)"
-  },
-  {
-    name: "Regent GX 9-9975RX3",
-    type: "CPU",
-    family: "ICS GX Series",
-    segment: "Flagship Gaming",
-    cores: "12C / 24T",
-    base: "4.9 GHz",
-    boost: "Up to 6.2 GHz",
-    cache: "156MB HyperCache X3 (28MB L2 + 128MB stacked L3)",
-    arch: "Regent Dot",
-    socket: "LGA-1851",
-    tdp: "150W",
-    ai: "Dual Neural Matrix Accelerators (NMA-2)",
-    mem: "DDR5-8000",
-    pcie: "PCIe 5.0, 32 lanes",
-    perf: "+20% avg FPS vs Ryzen 9 9950X3D, +27% 1% lows, up to +35% in CPU-bound esports"
-  },
+const kind = document.getElementById("kind");
+const search = document.getElementById("search");
+const slots = ["p1", "p2", "p3"].map(id => document.getElementById(id));
+let currentList = [];
 
-  // ICS SR series
-  {
-    name: "Regent SR-37",
-    type: "CPU",
-    family: "ICS SR Series",
-    segment: "Ultra-Efficient",
-    cores: "10C / 12T",
-    base: "3.8 GHz",
-    boost: "Up to 5.1 GHz",
-    cache: "48MB LiteCache",
-    arch: "Ultra Architecture",
-    socket: "Regent-S1",
-    tdp: "35–50W",
-    ai: "Single NMA",
-    mem: "LPDDR6-8800",
-    pcie: "PCIe 5.0, 8 lanes",
-    perf: "Baseline SR mobile performance"
-  },
-  {
-    name: "Regent SR-37 Pro",
-    type: "CPU",
-    family: "ICS SR Series",
-    segment: "Ultra-Efficient",
-    cores: "12C / 16T",
-    base: "4.0 GHz",
-    boost: "Up to 5.4 GHz",
-    cache: "64MB LiteCache",
-    arch: "Ultra Architecture",
-    socket: "Regent-S1",
-    tdp: "45–65W",
-    ai: "Dual NMA",
-    mem: "LPDDR6-9600",
-    pcie: "PCIe 5.0, 12 lanes",
-    perf: "+18% over SR-37"
-  },
-  {
-    name: "Regent SR-37 Max",
-    type: "CPU",
-    family: "ICS SR Series",
-    segment: "Ultra-Efficient",
-    cores: "14C / 18T",
-    base: "4.2 GHz",
-    boost: "Up to 5.6 GHz",
-    cache: "80MB LiteCache",
-    arch: "Ultra Architecture",
-    socket: "Regent-S1",
-    tdp: "55–80W",
-    ai: "Dual NMA-2",
-    mem: "LPDDR6-10400",
-    pcie: "PCIe 5.0, 16 lanes",
-    perf: "Around 20% below Apple M5 Max in sustained multi-core"
-  },
-  {
-    name: "Regent SR-37 Ultra",
-    type: "CPU",
-    family: "ICS SR Series",
-    segment: "Ultra-Efficient Flagship",
-    cores: "10C / 20T (Ultra Hybrid Cluster)",
-    base: "4.2 GHz",
-    boost: "Up to 5.6 GHz (Adaptive Ultra Boost)",
-    cache: "64MB LiteCache (20MB L2 + 44MB unified L3)",
-    arch: "Ultra Architecture (Gen-2 Efficiency Pipeline)",
-    socket: "Regent-S1 (mobile package)",
-    tdp: "65–95W Dynamic",
-    ai: "Dual Neural Matrix Accelerators (NMA-2)",
-    mem: "LPDDR6-9600, quad-channel",
-    pcie: "PCIe 5.0, 16 lanes (mobile optimized)",
-    perf: "+40% sustained vs SR-37 Max, ~40% above Apple M5 Max in pro workloads"
-  },
-
-  // ICS GX Flagship
-  {
-    name: "Regent GX 9-9995RX4D",
-    type: "CPU",
-    family: "ICS GX Flagship",
-    segment: "Extreme Gaming & Creation",
-    cores: "18C / 36T (8 HyperCores + 10 assist-cores)",
-    base: "4.9 GHz",
-    boost: "Up to 6.6 GHz (HyperCore boost)",
-    cache: "256MB HyperCache RX4 (64MB L2 + 192MB stacked L3)",
-    arch: "Regent Dot RA5 + HyperCore 8HC Engine",
-    socket: "LGA-1951 (RA5-platform, flagship-only)",
-    tdp: "220–260W Dynamic OC Range",
-    ai: "Quad NMA-3 (Next-Gen, 90+ TOPS)",
-    mem: "DDR5-9200 / DDR5-9600 (Quad-Channel)",
-    pcie: "PCIe 5.0, 32 lanes (GPU) + 16 lanes (NVMe/IO)",
-    perf: "Up to 1.8–1.9x Ryzen 9 9950X3D, +85% single-core vs best 8C/16T gaming CPU"
-  },
-   {
-    name: "Regent GX 9-9875RX3",
-    type: "CPU",
-    family: "ICS GX Series",
-    segment: "Upper Enthusiast Gaming",
-    cores: "16C / 32T",
-    base: "5.0 GHz",
-    boost: "Up to 6.32 GHz",
-    cache: "152MB HyperCache X3",
-    arch: "Regent Dot",
-    socket: "LGA-1851",
-    tdp: "175W",
-    ai: "Dual NMA-2",
-    mem: "DDR5-8500",
-    pcie: "PCIe 5.0, 32 lanes",
-    perf: "≈ 9900X3D-class; between GX 9-9850RX3 and GX 9-9950RX3"
-  },
-
-  {
-    name: "Regent GX 9-9920RX3",
-    type: "CPU",
-    family: "ICS GX Series",
-    segment: "Pro Gaming & Creation",
-    cores: "16C / 32T",
-    base: "5.05 GHz",
-    boost: "Up to 6.34 GHz",
-    cache: "168MB HyperCache X3",
-    arch: "Regent Dot (Enhanced)",
-    socket: "LGA-1851",
-    tdp: "180W",
-    ai: "Dual NMA-2",
-    mem: "DDR5-8600",
-    pcie: "PCIe 5.0, 32 lanes",
-    perf: "≈ 9950X3D in multi-core, slightly better in gaming"
-  }, 
-
-  // ICS Regent VX Series — New GPUs
-    {
-    name: "Regent VX 6660",
-    type: "GPU",
-    family: "ICS VX Series",
-    segment: "Mid-End Graphics",
-    cores: "120 Vortex Compute Units",
-    base: "1.95 GHz",
-    boost: "Up to 2.26 GHz",
-    cache: "56MB Unified HyperCache 1",
-    arch: "Vortex Architecture 1",
-    socket: "PCIe 5.0 x16",
-    tdp: "145–190W (ICS-efficient)",
-    ai: "MatrixCore 2 + HyperShader 4",
-    mem: "12GB HyperVRAM (410 GB/s)",
-    pcie: "PCIe 5.0 x16",
-    perf: "≈ RTX 4060 Ti in performance"
-  },
-  
-  {
-    name: "Regent VX 6660 TX",
-    type: "GPU",
-    family: "ICS VX Series",
-    segment: "Mid-High-End Graphics",
-    cores: "138 Vortex Compute Units",
-    base: "2.10 GHz",
-    boost: "Up to 2.57 GHz",
-    cache: "76MB Unified HyperCache 1",
-    arch: "Vortex Architecture 1",
-    socket: "PCIe 5.0 x16",
-    tdp: "175–210W (ICS-efficient)",
-    ai: "MatrixCore 3 + HyperShader 4",
-    mem: "12GB HyperVRAM (475 GB/s)",
-    pcie: "PCIe 5.0 x16",
-    perf: "≈ RTX 4070, -4% of RTX 4070"
-  },
-
-  {
-    name: "Regent VX 6670",
-    type: "GPU",
-    family: "ICS VX Series",
-    segment: "High-End Graphics",
-    cores: "144 Vortex Compute Units",
-    base: "2.20 GHz",
-    boost: "Up to 2.70 GHz",
-    cache: "96MB Unified HyperCache 1",
-    arch: "Vortex Architecture 1",
-    socket: "PCIe 5.0 x16",
-    tdp: "200–230W (ICS-efficient)",
-    ai: "MatrixCore 3 + HyperShader 4",
-    mem: "12GB HyperVRAM (570 GB/s)",
-    pcie: "PCIe 5.0 x16",
-    perf: "≈ RTX 4070 Ti / Ti Super"
-  },
-  
-  {
-    name: "Regent VX 6670 TX",
-    type: "GPU",
-    family: "ICS VX Series",
-    segment: "High-End Graphics",
-    cores: "160 Vortex Compute Units",
-    base: "2.25 GHz",
-    boost: "Up to 2.78 GHz",
-    cache: "110MB Unified HyperCache 1",
-    arch: "Vortex Architecture 1",
-    socket: "PCIe 5.0 x16",
-    tdp: "220–255W (ICS-efficient)",
-    ai: "MatrixCore 4 + HyperShader 4",
-    mem: "16GB HyperVRAM (600 GB/s)",
-    pcie: "PCIe 5.0 x16",
-    perf: "≈ RTX 4080 in performance"
-  },
-  
-  {
-    name: "Regent VX 6680",
-    type: "GPU",
-    family: "ICS VX Series",
-    segment: "Upper High-End Graphics",
-    cores: "168 Vortex Compute Units",
-    base: "2.28 GHz",
-    boost: "Up to 2.78 GHz",
-    cache: "112MB Unified HyperCache 1",
-    arch: "Vortex Architecture 1",
-    socket: "PCIe 5.0 x16",
-    tdp: "250–280W (ICS-efficient)",
-    ai: "MatrixCore 4 + HyperShader 4",
-    mem: "16GB HyperVRAM (820 GB/s)",
-    pcie: "PCIe 5.0 x16",
-    perf: "≈ 37–40% below VX 6690 (between RTX 4080 and 4080 Ti)"
-  },
-
-  {
-    name: "Regent VX 6690",
-    type: "GPU",
-    family: "ICS VX Series",
-    segment: "Flagship Graphics",
-    cores: "192 Vortex Compute Units",
-    base: "2.35 GHz",
-    boost: "Up to 2.85 GHz",
-    cache: "128MB Unified HyperCache 1",
-    arch: "Vortex Architecture 1",
-    socket: "PCIe 5.0 x16",
-    tdp: "300–330W (ICS-efficient)",
-    ai: "MatrixCore 4 + HyperShader 4",
-    mem: "24GB HyperVRAM (1024 GB/s)",
-    pcie: "PCIe 5.0 x16",
-    perf: "≈ RTX 4090 (slightly lower raster, higher AI/RT efficiency)"
-  },
-
-  // REAL-WORLD AMD RYZEN X3D & OTHERS
-  {
-    name: "AMD Ryzen 9 9950X3D",
-    type: "CPU",
-    family: "AMD Ryzen 9000",
-    segment: "Flagship Gaming & Creation",
-    cores: "16C / 32T",
-    base: "4.3 GHz",
-    boost: "Up to 5.7 GHz",
-    cache: "145MB total (incl. 128MB 3D V-Cache)",
-    arch: "Zen 5 \"Granite Ridge\" + 2nd-gen 3D V-Cache",
-    socket: "AM5",
-    tdp: "170W (230W PPT)",
-    ai: "Ryzen AI 2.0 (around 50 TOPS)",
-    mem: "DDR5-6400, up to 256GB",
-    pcie: "PCIe 5.0, 28 lanes",
-    perf: "Excellent hybrid chip: slightly under 9800X3D in pure gaming, much stronger in multi-core workloads"
-  },
-  {
-    name: "AMD Ryzen 7 9800X3D",
-    type: "CPU",
-    family: "AMD Ryzen 9000",
-    segment: "High-End Gaming",
-    cores: "8C / 16T",
-    base: "4.7 GHz",
-    boost: "Up to 5.2 GHz",
-    cache: "96MB L3 3D V-Cache",
-    arch: "Zen 5",
-    socket: "AM5",
-    tdp: "120W",
-    ai: "Ryzen AI 2.0 (around 40 TOPS)",
-    mem: "DDR5-6400",
-    pcie: "PCIe 5.0, 24 lanes",
-    perf: "One of the best gaming CPUs; ~6–8% ahead of 9950X3D in average FPS and up to ~20% in 1% lows"
-  },
-  {
-    name: "AMD Ryzen 7 7800X3D",
-    type: "CPU",
-    family: "AMD Ryzen 7000",
-    segment: "High-End Gaming",
-    cores: "8C / 16T",
-    base: "4.2 GHz",
-    boost: "Up to 5.0 GHz",
-    cache: "96MB 3D V-Cache",
-    arch: "Zen 4",
-    socket: "AM5",
-    tdp: "120W",
-    ai: "No dedicated NPU",
-    mem: "DDR5-6000 (sweet spot)",
-    pcie: "PCIe 5.0, 24 lanes",
-    perf: "Top-tier gaming CPU of its generation with excellent efficiency"
-  },
-  {
-    name: "AMD Ryzen 5 9600X",
-    type: "CPU",
-    family: "AMD Ryzen 9000",
-    segment: "Enthusiast Desktop",
-    cores: "6C / 12T",
-    base: "3.9 GHz",
-    boost: "Up to 5.4 GHz",
-    cache: "480KB L1 + 6MB L2 + 32MB L3",
-    arch: "Zen 5 (TSMC 4nm)",
-    socket: "AM5",
-    tdp: "65W",
-    ai: "Ryzen AI 2.0",
-    mem: "DDR5-6000+ EXPO",
-    pcie: "PCIe 5.0, 20 lanes",
-    perf: "Strong midrange CPU; excellent gaming value"
-  },
-  {
-    name: "AMD Ryzen 9 9900X3D",
-    type: "CPU",
-    family: "AMD Ryzen 9000",
-    segment: "High-End Gaming",
-    cores: "12C / 24T",
-      base: "4.6 GHz",
-    boost: "Up to 5.6 GHz",
-    cache: "128MB 3D V-Cache",
-    arch: "Zen 5",
-    socket: "AM5",
-    tdp: "120W",
-    ai: "Ryzen AI 2.0",
-      mem: "DDR5-6400",
-    pcie: "PCIe 5.0, 24 lanes",
-    perf: "≈ 9800X3D but stronger multi-core"
-  },
-
-
-  // REAL-WORLD INTEL
-  {
-    name: "Intel Core i9-14900K",
-    type: "CPU",
-    family: "Intel Core i9 14th Gen",
-    segment: "Flagship Desktop",
-    cores: "24C / 32T (8P + 16E)",
-    base: "3.2 GHz P / 2.4 GHz E",
-    boost: "Up to 6.0 GHz (TVB)",
-    cache: "32MB L2 + 36MB L3",
-    arch: "Raptor Lake Refresh (Intel 7)",
-    socket: "LGA 1700",
-    tdp: "125W base / 253W turbo",
-    ai: "No dedicated NPU on desktop variant",
-    mem: "DDR4-3200 / DDR5-5600",
-    pcie: "PCIe 5.0, 16 GPU + 4 NVMe",
-    perf: "Slight uplift over 13900K; strong all-rounder for gaming and creation"
-  },
-  {
-    name: "Intel Core i9-13900K",
-    type: "CPU",
-    family: "Intel Core i9 13th Gen",
-    segment: "High-End Desktop",
-    cores: "24C / 32T (8P + 16E)",
-    base: "3.0 GHz P / 2.2 GHz E",
-    boost: "Up to 5.8 GHz",
-    cache: "32MB L2 + 36MB L3",
-    arch: "Raptor Lake (Intel 7)",
-    socket: "LGA 1700",
-    tdp: "125W base / 253W turbo",
-    ai: "No dedicated NPU",
-    mem: "DDR4-3200 / DDR5-5600",
-    pcie: "PCIe 5.0, 16 GPU + 4 NVMe",
-    perf: "Very strong gaming and productivity CPU; ~10–15% over 12900K"
-  },
-  {
-    name: "Intel Core i5-12400F",
-    type: "CPU",
-    family: "Intel Core i5 12th Gen",
-    segment: "Mainstream Desktop",
-    cores: "6C / 12T (6P)",
-    base: "2.5 GHz",
-    boost: "Up to 4.4 GHz",
-    cache: "7.5MB L2 + 18MB L3",
-    arch: "Alder Lake-S (Golden Cove)",
-    socket: "LGA 1700",
-    tdp: "65W base / 117W turbo",
-    ai: "No dedicated NPU",
-    mem: "DDR4-3200 / DDR5-4800",
-    pcie: "PCIe 5.0, 16 lanes",
-    perf: "Legendary value gaming CPU; excellent 1080p/1440p performance"
-  },
-
-  // REAL-WORLD APPLE M-SERIES
-  {
-    name: "Apple M5",
-    type: "CPU",
-    family: "Apple M Series",
-    segment: "Notebook SoC",
-    cores: "9C / 9T (3 performance + 6 efficiency)",
-    base: "0.9–4.61 GHz P / 0.9–3.05 GHz E",
-    boost: "Up to 4.61 GHz (P-cores)",
-    cache: "28MB L2 (no disclosed L3)",
-    arch: "Apple M5 (3 nm, hybrid)",
-    socket: "SoC (soldered)",
-    tdp: "Around 30W under sustained load",
-    ai: "16-core Neural Engine (~38 TOPS)",
-    mem: "Unified memory (high bandwidth)",
-    pcie: "Integrated PCIe / Thunderbolt fabric",
-    perf: "Balanced efficiency-focused SoC for thin-and-light notebooks"
-  },
-  {
-    name: "Apple M5 Pro",
-    type: "CPU",
-    family: "Apple M Series",
-    segment: "Pro Notebook SoC",
-    cores: "18C / 18T (6 performance + 12 efficiency)",
-    base: "Approx. 1.0–4.3 GHz P / 1.0–3.2 GHz E",
-    boost: "Up to ~4.3 GHz (P-cores)",
-    cache: "Larger shared L2/L3-style unified cache (undisclosed size)",
-    arch: "Apple Fusion Architecture (M5 Pro)",
-    socket: "SoC (soldered)",
-    tdp: "Around 45–55W sustained",
-    ai: "16-core Neural Engine (higher throughput than base M5)",
-    mem: "Unified memory (high bandwidth, higher capacity options)",
-    pcie: "Integrated Thunderbolt 5 controllers",
-    perf: "Up to ~2.5x multi-core vs M1 Pro; strong for mobile creation"
-  },
-  {
-    name: "Apple M5 Max",
-    type: "CPU",
-    family: "Apple M Series",
-    segment: "Max Notebook SoC",
-    cores: "18C / 18T (6 performance + 12 efficiency, higher GPU config)",
-    base: "Approx. 1.0–4.4 GHz P / 1.0–3.2 GHz E",
-    boost: "Up to ~4.4 GHz (P-cores)",
-    cache: "Large unified cache pool (undisclosed size)",
-    arch: "Apple Fusion Architecture (M5 Max)",
-    socket: "SoC (soldered)",
-    tdp: "Around 60–80W sustained depending on chassis",
-    ai: "16-core Neural Engine (high AI throughput)",
-    mem: "Unified memory (very high bandwidth, large capacity options)",
-    pcie: "Integrated Thunderbolt 5 controllers",
-    perf: "High-end mobile SoC; strong multi-core and GPU for pro workflows"
-  },
-
-  // =========================
-  // NEW REAL-WORLD INTEL CPUs
-  // =========================
-
-  {
-    name: "Intel Core i5-14600KF",
-    type: "CPU",
-    family: "Intel Core i5 14th Gen",
-    segment: "Mainstream Desktop",
-    cores: "14C / 20T (6P + 8E)",
-    base: "3.5 GHz P / 2.6 GHz E",
-    boost: "Up to 5.3 GHz",
-    cache: "20MB L2 + 24MB L3",
-    arch: "Raptor Lake Refresh",
-    socket: "LGA 1700",
-    tdp: "125W base / 181W turbo",
-    ai: "None",
-    mem: "DDR4-3200 / DDR5-5600",
-    pcie: "PCIe 5.0, 20 lanes",
-    perf: "Excellent midrange gaming CPU"
-  },  
-    // =========================
-// NVIDIA RTX 50 SERIES (BLACKWELL)
-// =========================
-{
-  name: "GeForce RTX 5090",
-  type: "GPU",
-  family: "NVIDIA RTX 50 Series",
-  segment: "Ultra Enthusiast",
-  cuda: 21760,
-  shader: "Blackwell",
-  tensor: "5th Gen (3352 AI TOPS)",
-  rt: "4th Gen (318 TFLOPS)",
-  base: "2.01 GHz",
-  boost: "2.41 GHz",
-  vram: "32GB GDDR7",
-  bus: "512-bit",
-  tgp: "575W",
-  arch: "Blackwell",
-  pcie: "PCIe 5.0 x16",
-  perf: "Fastest gaming GPU; extreme 4K/8K performance"
-},
-{
-  name: "GeForce RTX 5080",
-  type: "GPU",
-  family: "NVIDIA RTX 50 Series",
-  segment: "High-End",
-  cuda: 10752,
-  shader: "Blackwell",
-  tensor: "5th Gen (1801 AI TOPS)",
-  rt: "4th Gen (171 TFLOPS)",
-  base: "2.30 GHz",
-  boost: "2.62 GHz",
-  vram: "16GB GDDR7",
-  bus: "256-bit",
-  tgp: "360W",
-  arch: "Blackwell",
-  pcie: "PCIe 5.0 x16",
-  perf: "Excellent 4K GPU; huge RT uplift"
-},
-{
-  name: "GeForce RTX 5070 Ti",
-  type: "GPU",
-  family: "NVIDIA RTX 50 Series",
-  segment: "Upper Midrange",
-  cuda: 8960,
-  shader: "Blackwell",
-  tensor: "5th Gen (1406 AI TOPS)",
-  rt: "4th Gen (133 TFLOPS)",
-  base: "2.30 GHz",
-  boost: "2.45 GHz",
-  vram: "16GB GDDR7",
-  bus: "256-bit",
-  tgp: "300W",
-  arch: "Blackwell",
-  pcie: "PCIe 5.0 x16",
-  perf: "Strong 1440p/4K card; great RT"
-},
-{
-  name: "GeForce RTX 5070",
-  type: "GPU",
-  family: "NVIDIA RTX 50 Series",
-  segment: "1440p High-End",
-  cuda: 6144,
-  shader: "Blackwell",
-  tensor: "5th Gen (988 AI TOPS)",
-  rt: "4th Gen (94 TFLOPS)",
-  base: "2.33 GHz",
-  boost: "2.51 GHz",
-  vram: "12GB GDDR7",
-  bus: "192-bit",
-  tgp: "250W",
-  arch: "Blackwell",
-  pcie: "PCIe 5.0 x16",
-  perf: "Perfect 1440p GPU; excellent efficiency"
-},
-{
-  name: "GeForce RTX 5060 Ti",
-  type: "GPU",
-  family: "NVIDIA RTX 50 Series",
-  segment: "Midrange",
-  cuda: 4608,
-  shader: "Blackwell",
-  tensor: "5th Gen (759 AI TOPS)",
-  rt: "4th Gen (72 TFLOPS)",
-  base: "2.41 GHz",
-  boost: "2.57 GHz",
-  vram: "16GB or 8GB GDDR7",
-  bus: "128-bit",
-  tgp: "180W",
-  arch: "Blackwell",
-  pcie: "PCIe 5.0 x8",
-  perf: "Strong 1080p/1440p card with DLSS 4.5"
-},
-{
-  name: "GeForce RTX 5060",
-  type: "GPU",
-  family: "NVIDIA RTX 50 Series",
-  segment: "Midrange",
-  cuda: 3840,
-  shader: "Blackwell",
-  tensor: "5th Gen (614 AI TOPS)",
-  rt: "4th Gen (58 TFLOPS)",
-  base: "2.28 GHz",
-  boost: "2.50 GHz",
-  vram: "8GB GDDR7",
-  bus: "128-bit",
-  tgp: "145W",
-  arch: "Blackwell",
-  pcie: "PCIe 5.0 x8",
-  perf: "Great 1080p card; efficient and cool"
-},
-{
-  name: "GeForce RTX 5050",
-  type: "GPU",
-  family: "NVIDIA RTX 50 Series",
-  segment: "Entry Level",
-  cuda: 2560,
-  shader: "Blackwell",
-  tensor: "5th Gen (421 AI TOPS)",
-  rt: "4th Gen (40 TFLOPS)",
-  base: "2.31 GHz",
-  boost: "2.57 GHz",
-  vram: "8GB GDDR6",
-  bus: "128-bit",
-  tgp: "130W",
-  arch: "Blackwell",
-  pcie: "PCIe 5.0 x8",
-  perf: "Solid 1080p card; DLSS 4.5 helps a lot"
-},
-  // =========================
-// NVIDIA RTX 30 SERIES (AMPERE)
-// =========================
-
-{
-  name: "GeForce RTX 3090 Ti",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "Ultra Enthusiast",
-  cuda: 10752,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.56 GHz",
-  boost: "1.86 GHz",
-  vram: "24GB GDDR6X",
-  bus: "384-bit",
-  tgp: "450W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x16",
-  perf: "Top-tier 4K performance; extremely high power draw"
-},
-{
-  name: "GeForce RTX 3090",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "Ultra Enthusiast",
-  cuda: 10496,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.40 GHz",
-  boost: "1.70 GHz",
-  vram: "24GB GDDR6X",
-  bus: "384-bit",
-  tgp: "350W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x16",
-  perf: "Excellent 4K GPU; strong compute performance"
-},
-{
-  name: "GeForce RTX 3080 Ti",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "High-End",
-  cuda: 10240,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.37 GHz",
-  boost: "1.67 GHz",
-  vram: "12GB GDDR6X",
-  bus: "384-bit",
-  tgp: "350W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x16",
-  perf: "Near‑3090 performance at lower cost"
-},
-{
-  name: "GeForce RTX 3080 (12GB)",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "High-End",
-  cuda: 8960,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.26 GHz",
-  boost: "1.71 GHz",
-  vram: "12GB GDDR6X",
-  bus: "384-bit",
-  tgp: "350W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x16",
-  perf: "Strong 4K card; better VRAM than 10GB model"
-},
-{
-  name: "GeForce RTX 3080 (10GB)",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "High-End",
-  cuda: 8704,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.44 GHz",
-  boost: "1.71 GHz",
-  vram: "10GB GDDR6X",
-  bus: "320-bit",
-  tgp: "320W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x16",
-  perf: "Excellent 4K performance; VRAM can limit in modern titles"
-},
-{
-  name: "GeForce RTX 3070 Ti",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "Upper Midrange",
-  cuda: 6144,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.58 GHz",
-  boost: "1.77 GHz",
-  vram: "8GB GDDR6X",
-  bus: "256-bit",
-  tgp: "290W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x16",
-  perf: "Strong 1440p card; high power draw"
-},
-{
-  name: "GeForce RTX 3070",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "Upper Midrange",
-  cuda: 5888,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.50 GHz",
-  boost: "1.73 GHz",
-  vram: "8GB GDDR6",
-  bus: "256-bit",
-  tgp: "220W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x16",
-  perf: "Excellent 1440p performance"
-},
-{
-  name: "GeForce RTX 3060 Ti",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "Midrange",
-  cuda: 4864,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.41 GHz",
-  boost: "1.67 GHz",
-  vram: "8GB GDDR6 or GDDR6X",
-  bus: "256-bit",
-  tgp: "200W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x16",
-  perf: "Great 1080p/1440p card"
-},
-{
-  name: "GeForce RTX 3060 (12GB)",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "Midrange",
-  cuda: 3584,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.32 GHz",
-  boost: "1.78 GHz",
-  vram: "12GB GDDR6",
-  bus: "192-bit",
-  tgp: "170W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x16",
-  perf: "Good 1080p card; large VRAM buffer"
-},
-{
-  name: "GeForce RTX 3060 (8GB)",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "Midrange",
-  cuda: 3584,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.32 GHz",
-  boost: "1.78 GHz",
-  vram: "8GB GDDR6",
-  bus: "128-bit",
-  tgp: "170W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x16",
-  perf: "Budget 1080p option"
-},
-{
-  name: "GeForce RTX 3050 (8GB)",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "Entry Level",
-  cuda: 2560,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.55 GHz",
-  boost: "1.78 GHz",
-  vram: "8GB GDDR6",
-  bus: "128-bit",
-  tgp: "130W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x8",
-  perf: "Entry-level 1080p gaming"
-},
-{
-  name: "GeForce RTX 3050 (6GB)",
-  type: "GPU",
-  family: "NVIDIA RTX 30 Series",
-  segment: "Entry Level",
-  cuda: 2304,
-  shader: "Ampere",
-  tensor: "3rd Gen",
-  rt: "2nd Gen",
-  base: "1.04 GHz",
-  boost: "1.47 GHz",
-  vram: "6GB GDDR6",
-  bus: "96-bit",
-  tgp: "70W",
-  arch: "Ampere",
-  pcie: "PCIe 4.0 x8",
-  perf: "Low-power 1080p card"
-},
-  // =========================
-// AMD RADEON RX 9000 SERIES (RDNA 4)
-// =========================
-
-{
-  name: "Radeon RX 9070 XT",
-  type: "GPU",
-  family: "AMD RX 9000 Series",
-  segment: "Enthusiast",
-  compute: "~64 CU",
-  shader: "RDNA 4",
-  rt: "Yes",
-  ai: "AI Accelerators",
-  base: "~2.5 GHz",
-  boost: "~3.0 GHz",
-  vram: "16GB GDDR6",
-  bus: "256-bit",
-  tgp: "~300W",
-  arch: "RDNA 4",
-  pcie: "PCIe 5.0 x16",
-  perf: "High-end 4K / strong RT uplift"
-},
-{
-  name: "Radeon RX 9070",
-  type: "GPU",
-  family: "AMD RX 9000 Series",
-  segment: "High-End",
-  compute: "~56 CU",
-  shader: "RDNA 4",
-  rt: "Yes",
-  ai: "AI Accelerators",
-  base: "~2.4 GHz",
-  boost: "~2.9 GHz",
-  vram: "16GB GDDR6",
-  bus: "256-bit",
-  tgp: "~260W",
-  arch: "RDNA 4",
-  pcie: "PCIe 5.0 x16",
-  perf: "Strong 1440p / entry 4K"
-},
-{
-  name: "Radeon RX 9060 XT",
-  type: "GPU",
-  family: "AMD RX 9000 Series",
-  segment: "Upper Midrange",
-  compute: "~40 CU",
-  shader: "RDNA 4",
-  rt: "Yes",
-  ai: "AI Accelerators",
-  base: "~2.3 GHz",
-  boost: "~2.7 GHz",
-  vram: "12GB GDDR6",
-  bus: "192-bit",
-  tgp: "~200W",
-  arch: "RDNA 4",
-  pcie: "PCIe 5.0 x16",
-  perf: "High 1440p gaming"
-},
-{
-  name: "Radeon RX 9060",
-  type: "GPU",
-  family: "AMD RX 9000 Series",
-  segment: "Midrange",
-  compute: "~32 CU",
-  shader: "RDNA 4",
-  rt: "Yes",
-  ai: "AI Accelerators",
-  base: "~2.2 GHz",
-  boost: "~2.6 GHz",
-  vram: "8–12GB GDDR6",
-  bus: "128–192-bit",
-  tgp: "~150W",
-  arch: "RDNA 4",
-  pcie: "PCIe 5.0 x16",
-  perf: "1080p / 1440p mix"
-},
-
-// =========================
-// AMD RADEON RX 7000 SERIES (RDNA 3)
-// =========================
-
-{
-  name: "Radeon RX 7900 XTX",
-  type: "GPU",
-  family: "AMD RX 7000 Series",
-  segment: "Ultra Enthusiast",
-  compute: "96 CU",
-  shader: "RDNA 3",
-  rt: "Yes",
-  ai: "AI Accelerators",
-  base: "1.9 GHz",
-  boost: "2.5 GHz",
-  vram: "24GB GDDR6",
-  bus: "384-bit",
-  tgp: "355W",
-  arch: "RDNA 3",
-  pcie: "PCIe 4.0 x16",
-  perf: "Top-tier 4K raster"
-},
-{
-  name: "Radeon RX 7900 XT",
-  type: "GPU",
-  family: "AMD RX 7000 Series",
-  segment: "Enthusiast",
-  compute: "84 CU",
-  shader: "RDNA 3",
-  rt: "Yes",
-  ai: "AI Accelerators",
-  base: "1.5 GHz",
-  boost: "2.4 GHz",
-  vram: "20GB GDDR6",
-  bus: "320-bit",
-  tgp: "300W",
-  arch: "RDNA 3",
-  pcie: "PCIe 4.0 x16",
-  perf: "High-end 4K"
-},
-{
-  name: "Radeon RX 7800 XT",
-  type: "GPU",
-  family: "AMD RX 7000 Series",
-  segment: "High-End",
-  compute: "60 CU",
-  shader: "RDNA 3",
-  rt: "Yes",
-  ai: "AI Accelerators",
-  base: "1.3 GHz",
-  boost: "2.4 GHz",
-  vram: "16GB GDDR6",
-  bus: "256-bit",
-  tgp: "263W",
-  arch: "RDNA 3",
-  pcie: "PCIe 4.0 x16",
-  perf: "Strong 1440p"
-},
-{
-  name: "Radeon RX 7700 XT",
-  type: "GPU",
-  family: "AMD RX 7000 Series",
-  segment: "Upper Midrange",
-  compute: "54 CU",
-  shader: "RDNA 3",
-  rt: "Yes",
-  ai: "AI Accelerators",
-  base: "1.7 GHz",
-  boost: "2.5 GHz",
-  vram: "12GB GDDR6",
-  bus: "192-bit",
-  tgp: "245W",
-  arch: "RDNA 3",
-  pcie: "PCIe 4.0 x16",
-  perf: "High 1440p"
-},
-
-// =========================
-// AMD RADEON RX 6000 SERIES (RDNA 2)
-// =========================
-
-{
-  name: "Radeon RX 6800 XT",
-  type: "GPU",
-  family: "AMD RX 6000 Series",
-  segment: "High-End",
-  compute: "72 CU",
-  shader: "RDNA 2",
-  rt: "Yes",
-  ai: "No",
-  base: "1.8 GHz",
-  boost: "2.25 GHz",
-  vram: "16GB GDDR6",
-  bus: "256-bit",
-  tgp: "300W",
-  arch: "RDNA 2",
-  pcie: "PCIe 4.0 x16",
-  perf: "Strong raster 1440p/4K"
-},
-{
-  name: "Radeon RX 6700 XT",
-  type: "GPU",
-  family: "AMD RX 6000 Series",
-  segment: "Midrange",
-  compute: "40 CU",
-  shader: "RDNA 2",
-  rt: "Yes",
-  ai: "No",
-  base: "2.3 GHz",
-  boost: "2.6 GHz",
-  vram: "12GB GDDR6",
-  bus: "192-bit",
-  tgp: "230W",
-  arch: "RDNA 2",
-  pcie: "PCIe 4.0 x16",
-  perf: "Great 1440p value"
-},
-  // =========================
-// INTEL ARC B-SERIES (BATTLEMAGE)
-// =========================
-
-{
-  name: "Intel Arc B580",
-  type: "GPU",
-  family: "Intel Arc B-Series",
-  segment: "High-end mainstream",
-  arch: "Battlemage",
-  xe: "20 Xe cores",
-  base: "N/A",
-  boost: "N/A",
-  vram: "12GB GDDR6",
-  bus: "192-bit",
-  tgp: "190W",
-  pcie: "PCIe 4.0 x8",
-  perf: "One of Intel’s strongest current Arc desktop cards"
-},
-{
-  name: "Intel Arc B570",
-  type: "GPU",
-  family: "Intel Arc B-Series",
-  segment: "Upper midrange",
-  arch: "Battlemage",
-  xe: "18 Xe cores",
-  base: "N/A",
-  boost: "N/A",
-  vram: "10GB GDDR6",
-  bus: "160-bit",
-  tgp: "150W",
-  pcie: "PCIe 4.0 x8",
-  perf: "Strong value-focused desktop GPU"
-},
-
-// =========================
-// INTEL ARC A-SERIES (ALCHEMIST)
-// =========================
-
-{
-  name: "Intel Arc A770",
-  type: "GPU",
-  family: "Intel Arc A-Series",
-  segment: "Enthusiast",
-  arch: "Alchemist",
-  xe: "32 Xe cores",
-  base: "N/A",
-  boost: "N/A",
-  vram: "16GB GDDR6",
-  bus: "256-bit",
-  tgp: "225W",
-  pcie: "PCIe 4.0 x16",
-  perf: "Intel’s top A-series desktop card"
-},
-{
-  name: "Intel Arc A750",
-  type: "GPU",
-  family: "Intel Arc A-Series",
-  segment: "High-end",
-  arch: "Alchemist",
-  xe: "28 Xe cores",
-  base: "N/A",
-  boost: "N/A",
-  vram: "8GB GDDR6",
-  bus: "256-bit",
-  tgp: "225W",
-  pcie: "PCIe 4.0 x16",
-  perf: "Popular upper-tier Arc desktop GPU"
-},
-{
-  name: "Intel Arc A580",
-  type: "GPU",
-  family: "Intel Arc A-Series",
-  segment: "Midrange",
-  arch: "Alchemist",
-  xe: "24 Xe cores",
-  base: "N/A",
-  boost: "N/A",
-  vram: "8GB GDDR6",
-  bus: "256-bit",
-  tgp: "185W",
-  pcie: "PCIe 4.0 x16",
-  perf: "Solid 1080p/1440p option"
-},
-{
-  name: "Intel Arc A380",
-  type: "GPU",
-  family: "Intel Arc A-Series",
-  segment: "Entry-level",
-  arch: "Alchemist",
-  xe: "8 Xe cores",
-  base: "N/A",
-  boost: "N/A",
-  vram: "6GB GDDR6",
-  bus: "96-bit",
-  tgp: "75W",
-  pcie: "PCIe 4.0 x8",
-  perf: "Budget Arc desktop card"
-},
-
-// =========================
-// INTEL ARC PRO B-SERIES (WORKSTATION)
-// =========================
-
-{
-  name: "Intel Arc Pro B70",
-  type: "GPU",
-  family: "Intel Arc Pro B-Series",
-  segment: "Workstation",
-  arch: "Battlemage",
-  xe: "Not disclosed",
-  base: "N/A",
-  boost: "N/A",
-  vram: "Workstation memory",
-  bus: "N/A",
-  tgp: "N/A",
-  pcie: "PCIe 4.0",
-  perf: "Professional GPU for workstation workloads"
-},
-{
-  name: "Intel Arc Pro B65",
-  type: "GPU",
-  family: "Intel Arc Pro B-Series",
-  segment: "Workstation",
-  arch: "Battlemage",
-  xe: "Not disclosed",
-  base: "N/A",
-  boost: "N/A",
-  vram: "Workstation memory",
-  bus: "N/A",
-  tgp: "N/A",
-  pcie: "PCIe 4.0",
-  perf: "Professional GPU for workstation workloads"
+function metric(item) {
+  return kind.value === "cpu" ? item.gaming : item.index;
 }
-];
+function metricLabel() {
+  return kind.value === "cpu" ? "Gaming throughput (9800X3D = 100)" : "Raster performance (RTX 4070 = 100)";
+}
 
-function load() {
-  const selects = [
-    document.getElementById("p1"),
-    document.getElementById("p2"),
-    document.getElementById("p3")
-  ];
+function refreshOptions() {
+  const q = search.value.trim().toLowerCase();
+  const all = kind.value === "cpu" ? CPUS : GPUS;
+  currentList = all.filter(it => !q ||
+    (it.name + " " + it.family + " " + it.arch + " " + it.segment).toLowerCase().includes(q));
 
-  selects.forEach(sel => {
-    const placeholder = document.createElement("option");
-    placeholder.textContent = "Select product...";
-    placeholder.value = "";
-    sel.appendChild(placeholder);
+  const labelFn = kind.value === "cpu"
+    ? c => `${c.name} — ${c.cores}C/${c.threads}T`
+    : g => `${g.name} — ${g.vram} GB`;
 
-    products.forEach(p => {
-      const opt = document.createElement("option");
-      opt.value = p.name;
-      opt.textContent = p.name;
-      sel.appendChild(opt);
-    });
+  const chosen = slots.map(s => s.value);
+  slots.forEach((sel, i) => {
+    fillSelect(sel, [{ id: "", name: "— empty slot —" }, ...currentList], { labelFn });
+    if (chosen[i] && [...sel.options].some(o => o.value === chosen[i])) sel.value = chosen[i];
+    else sel.value = "";
   });
+
+  // sensible defaults so the page is never empty
+  if (!slots.some(s => s.value)) {
+    const defaults = kind.value === "cpu"
+      ? ["9800x3d", "14900k", "7800x3d"]
+      : ["rtx5070", "rtx4070s", "rx9070"];
+    defaults.forEach((d, i) => { if (slots[i]) slots[i].value = d; });
+  }
 }
 
 function compare() {
-  const p1Sel = document.getElementById("p1");
-  const p2Sel = document.getElementById("p2");
-  const p3Sel = document.getElementById("p3");
-  const resultTable = document.getElementById("result");
+  const picked = slots.map(s => s.value).filter(Boolean).map(id =>
+    (kind.value === "cpu" ? cpuById(id) : gpuById(id)));
 
-  const chosen = [p1Sel.value, p2Sel.value, p3Sel.value]
-    .map(name => products.find(p => p.name === name))
-    .filter(Boolean);
+  if (!picked.length) { toast("Pick at least one part"); return; }
 
-  if (chosen.length === 0) {
-    resultTable.innerHTML = "<tr><td>No products selected.</td></tr>";
-    return;
-  }
+  /* ---- performance bars ---- */
+  const vals = picked.map(metric);
+  const best = Math.max(...vals);
+  document.getElementById("perfChart").innerHTML =
+    sparkline(vals, picked.map(p => p.name.replace(/^(NVIDIA GeForce|AMD Radeon|AMD|Intel|Apple) /, "")), vals.indexOf(best));
+  mountCharts(document.getElementById("perfChart"));
 
-  const col = (fn) => chosen
-    .map(c => `<td>${fn(c) || "Missing Data"}</td>`)
-    .join("");
+  const spread = picked.length > 1
+    ? Math.round((best / Math.min(...vals) - 1) * 100) : 0;
+  const winner = picked[vals.indexOf(best)];
+  document.getElementById("perfNote").innerHTML =
+    `<b>${winner.name}</b> leads on ${metricLabel().split(" (")[0].toLowerCase()}.` +
+    (picked.length > 1 ? ` The gap to the slowest of the three is <b>${spread}%</b>.` : "");
 
-  resultTable.innerHTML = `
-    <tr>
-      <th></th>
-      ${chosen.map(c => `<th>${c.name}<br><span class="product-type">${c.family}</span></th>`).join("")}
-    </tr>
-    <tr><td class="spec-label">Type</td>${col(c => c.type)}</tr>
-    <tr><td class="spec-label">Segment</td>${col(c => c.segment)}</tr>
-    <tr><td class="spec-label">Cores / Threads</td>${col(c => c.cores)}</tr>
-    <tr><td class="spec-label">Base Clock</td>${col(c => c.base)}</tr>
-    <tr><td class="spec-label">Boost Clock</td>${col(c => c.boost)}</tr>
-    <tr><td class="spec-label">Total Cache</td>${col(c => c.cache)}</tr>
-    <tr><td class="spec-label">Architecture</td>${col(c => c.arch)}</tr>
-    <tr><td class="spec-label">Socket / Interface</td>${col(c => c.socket)}</tr>
-    <tr><td class="spec-label">TDP</td>${col(c => c.tdp)}</tr>
-    <tr><td class="spec-label">AI Engines</td>${col(c => c.ai)}</tr>
-    <tr><td class="spec-label">Memory Support</td>${col(c => c.mem)}</tr>
-    <tr><td class="spec-label">PCIe / Lanes</td>${col(c => c.pcie)}</tr>
-    <tr><td class="spec-label">Performance</td>${col(c => c.perf)}</tr>
-  `;
+  /* ---- spec table ---- */
+  const isCpu = kind.value === "cpu";
+  const col = fn => picked.map(p => `<td>${fn(p) ?? "—"}</td>`).join("");
+
+  const rows = isCpu ? [
+    ["Family",        c => c.family],
+    ["Segment",       c => c.segment],
+    ["Cores / Threads", c => `${c.cores}C / ${c.threads}T`],
+    ["Base clock",    c => c.base],
+    ["Boost clock",   c => c.boost],
+    ["Cache",         c => c.cache],
+    ["Architecture",  c => c.arch],
+    ["Socket",        c => c.socket],
+    ["TDP / PPT",     c => `${c.tdp} W / ${c.ppt} W`],
+    ["Memory",        c => c.mem],
+    ["PCIe",          c => c.pcie],
+    ["NPU",           c => c.npu],
+    ["Released",      c => c.released],
+    ["Gaming score",  c => `<b class="c-gold">${c.gaming}</b>`],
+    ["Multi-thread",  c => `<b class="c-cyan">${c.mt}</b> <small>(9950X = 100)</small>`],
+    ["Launch price",  c => c.price ? "$" + fmt(c.price) : "—"]
+  ] : [
+    ["Family",        g => g.family],
+    ["Segment",       g => g.segment],
+    ["Architecture",  g => g.arch],
+    ["Shaders",       g => g.cores],
+    ["Boost clock",   g => g.boost],
+    ["Memory",        g => `${g.vram} GB ${g.vramType}`],
+    ["Bus",           g => g.bus],
+    ["Bandwidth",     g => fmt(g.bw) + " GB/s"],
+    ["TGP",           g => g.tdp + " W"],
+    ["Interface",     g => g.pcie],
+    ["Typical length",g => g.length + " mm"],
+    ["Upscaler",      g => upscalerName(g)],
+    ["Frame generation", g => g.fg ? `Up to ${g.fg}×` : "No"],
+    ["Ray tracing",   g => g.noRT ? '<b class="c-red">No RT hardware</b>' : `Yes (loss factor ×${g.rtFac})`],
+    ["Released",      g => g.released],
+    ["Raster score",  g => `<b class="c-gold">${g.index}</b>`],
+    ["Launch price",  g => g.price ? "$" + fmt(g.price) : "—"],
+    ["Verdict",       g => g.perf]
+  ];
+
+  document.getElementById("result").innerHTML = `
+    <thead><tr><th></th>${picked.map(p =>
+      `<th>${p.name}<br><span class="pf-chip gold" style="margin-top:6px;">${p.family}</span></th>`).join("")}</tr></thead>
+    <tbody>${rows.map(([label, fn]) =>
+      `<tr><td class="spec-label">${label}</td>${col(fn)}</tr>`).join("")}</tbody>`;
 }
 
-load();
-</script>
+kind.addEventListener("change", () => { refreshOptions(); compare(); });
+search.addEventListener("input", refreshOptions);
+document.getElementById("compare").addEventListener("click", compare);
+slots.forEach(s => s.addEventListener("change", compare));
 
+document.getElementById("dbCount").textContent = CPUS.length + GPUS.length;
+refreshOptions();
+compare();
+</script>
 </body>
 </html>

@@ -2,733 +2,199 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ICS Regent – Can You Run It?</title>
-
-<style>
-  body {
-    margin: 0;
-    padding: 40px;
-    background: linear-gradient(135deg, #050505, #000000);
-    color: #e6e6e6;
-    font-family: "Segoe UI", system-ui, sans-serif;
-  }
-
-  .ics-container {
-    max-width: 1100px;
-    margin: auto;
-    backdrop-filter: blur(18px);
-  }
-
-  .ics-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .ics-logo {
-    font-size: 32px;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    color: #ffd700;
-    font-weight: 600;
-  }
-
-  .ics-subtitle {
-    color: #bbb;
-    margin-top: 8px;
-    font-size: 15px;
-  }
-
-  .ics-frame {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 25px;
-    margin-bottom: 30px;
-    border-radius: 18px;
-    transition: 0.3s ease;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.08);
-  }
-
-  .ics-frame:hover {
-    border-color: rgba(255, 215, 0, 0.6);
-    box-shadow: 0 0 35px rgba(255, 215, 0, 0.25);
-    transform: translateY(-3px);
-  }
-
-  select, button {
-    width: 100%;
-    background: rgba(20, 20, 20, 0.85);
-    color: #eee;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    padding: 12px;
-    border-radius: 10px;
-    margin: 10px 0;
-    transition: 0.2s;
-    font-size: 15px;
-    backdrop-filter: blur(12px);
-  }
-
-  select:hover, button:hover {
-    border-color: #ffd700;
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
-  }
-
-  select option {
-    background: #111;
-    color: #eee;
-  }
-
-  button {
-    cursor: pointer;
-    background: rgba(255, 215, 0, 0.15);
-    font-weight: 600;
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .row-3 {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .result-box {
-    margin-top: 20px;
-    padding: 25px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    text-align: center;
-    font-size: 26px;
-    font-weight: 700;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(14px);
-    transition: 0.3s ease;
-  }
-
-  .res-no    { color: #ff4d4d; text-shadow: 0 0 12px rgba(255, 0, 0, 0.6); }
-  .res-yesok { color: #ffae42; text-shadow: 0 0 12px rgba(255, 165, 0, 0.6); }
-  .res-yes   { color: #7CFC00; text-shadow: 0 0 12px rgba(124, 252, 0, 0.6); }
-
-  .details {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #ccc;
-    line-height: 1.6;
-  }
-
-  .ics-nav {
-    width: 100%;
-    background: rgba(0,0,0,0.65);
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    padding: 16px 24px;
-    display: flex;
-    gap: 30px;
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    backdrop-filter: blur(12px);
-    margin: -40px -40px 40px -40px;
-  }
-
-  .ics-nav a {
-    color: #ffd700;
-    text-decoration: none;
-    font-size: 16px;
-    letter-spacing: 1px;
-    transition: 0.25s ease;
-    padding-bottom: 4px;
-  }
-
-  .ics-nav a:hover {
-    color: white;
-    text-shadow: 0 0 10px #ffd700;
-  }
-
-  .ics-nav a.active {
-    color: white;
-    border-bottom: 2px solid #ffd700;
-    text-shadow: 0 0 12px #ffd700;
-  }
-
-  /* ▼ MORE MENU DROPDOWN */
-.nav-more {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.nav-more-btn {
-  color: #ffd700;
-  cursor: pointer;
-  font-size: 16px;
-  letter-spacing: 1px;
-  padding-bottom: 4px;
-  transition: 0.25s ease;
-}
-
-.nav-more-btn:hover {
-  color: white;
-  text-shadow: 0 0 10px #ffd700;
-}
-
-.nav-more-menu {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 14px;
-  padding: 10px;
-  width: 220px;
-  display: none;
-  flex-direction: column;
-  box-shadow: 0 0 25px rgba(255,215,0,0.15);
-  z-index: 9999;
-}
-
-.nav-more-menu a {
-  color: #ffd700;
-  text-decoration: none;
-  padding: 8px 10px;
-  border-radius: 10px;
-  transition: 0.25s ease;
-  display: block;
-  font-size: 14px;
-}
-
-.nav-more-menu a:hover {
-  background: rgba(255,255,255,0.08);
-  color: white;
-  text-shadow: 0 0 10px #ffd700;
-}
-
-  .tag {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    margin-right: 6px;
-    border: 1px solid rgba(255,255,255,0.2);
-  }
-
-  .tag-info { color: #7dd3fc; border-color: #0ea5e9; }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Can You Run It? — PCFORGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/theme.css">
 </head>
 <body>
 
-<div class="ics-nav">
-  <a href="index.html" class="nav-link" data-page="index">CPU/GPU Comparison</a>
-  <a href="fps.html" class="nav-link" data-page="fps">FPS Estimator</a>
-  <a href="canyourunit.html" class="nav-link" data-page="canyourunit">Can You Run It?</a>
-  <a href="build.html" class="nav-link" data-page="build">Build Your PC</a>
-  <a href="pclifetime.html" class="nav-link" data-page="pclifetime">PC Lifespan</a>
-  <a href="thermals.html" class="nav-link" data-page="thermals">Thermal & Cooling</a>
-  <a href="consumption.html" class="nav-link" data-page="consumption">Power Consumption</a>
-  <a href="storage.html" class="nav-link" data-page="storage">Storage & Load Times</a>
+<div class="pf-container">
 
-  <!-- ▼ NEW DROPDOWN BUTTON (INSIDE NAV!) -->
-  <div class="nav-more">
-    <span class="nav-more-btn">More ▼</span>
-    <div class="nav-more-menu">
-      <a href="bottleneck.html">Bottleneck Analyzer</a>
-      <a href="future1.html">Future Tool 1</a>
-      <a href="future2.html">Future Tool 2</a>
-      <a href="future3.html">Future Tool 3</a>
+  <header class="pf-hero">
+    <div class="pf-eyebrow">● Requirement check</div>
+    <h1>Can You Run It?</h1>
+    <p>A straight yes-or-no against the minimum and recommended requirements for
+       <span id="gameName" class="c-gold"></span> — CPU, GPU, VRAM, system RAM and storage.
+       No frame-rate guessing here; use the FPS Estimator for that.</p>
+  </header>
+
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">🖥</span> Your hardware</h2>
+    <div class="pf-grid pf-grid-2">
+      <div><label class="pf-label" for="cpu">CPU</label><select id="cpu"></select></div>
+      <div><label class="pf-label" for="gpu">GPU</label><select id="gpu"></select></div>
     </div>
-  </div>
-</div>
-
-  <script>
-  const moreBtn = document.querySelector(".nav-more-btn");
-  const moreMenu = document.querySelector(".nav-more-menu");
-
-  moreBtn.addEventListener("click", () => {
-    moreMenu.style.display = moreMenu.style.display === "flex" ? "none" : "flex";
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".nav-more")) {
-      moreMenu.style.display = "none";
-    }
-  });
-</script>
-
-  <script>
-  const current = window.location.pathname.split("/").pop().toLowerCase();
-  document.querySelectorAll(".nav-link").forEach(link => {
-    if (current.includes(link.getAttribute("data-page"))) {
-      link.classList.add("active");
-    }
-  });
-</script>
-
-<div class="ics-container">
-
-  <div class="ics-header">
-    <div class="ics-logo">ICS REGENT</div>
-    <div class="ics-subtitle">Can You Run It? — System Requirement Analyzer</div>
-  </div>
-
-  <!-- User hardware -->
-  <div class="ics-frame">
-    <h2>Your Hardware</h2>
-    <p>Select Your Components. This is only used to check if you can run the game, not the FPS.</p>
-
-    <div class="row">
-      <div>
-        <label>CPU</label>
-        <select id="cpu"></select>
-      </div>
-      <div>
-        <label>GPU</label>
-        <select id="gpu"></select>
-      </div>
+    <div class="pf-grid pf-grid-3" style="margin-top:14px;">
+      <div><label class="pf-label" for="ramAmount">System RAM</label><select id="ramAmount"></select></div>
+      <div><label class="pf-label" for="storageType">Game installed on</label><select id="storageType"></select></div>
+      <div><label class="pf-label" for="game">Game</label><select id="game"></select></div>
     </div>
+    <button class="pf-btn" id="run">Check requirements</button>
+  </section>
 
-    <div class="row">
-      <div>
-        <label>RAM amount</label>
-        <select id="ramAmount"></select>
-      </div>
-      <div>
-        <label>RAM speed / type</label>
-        <select id="ramSpeed">
-          <option value="ddr4-2133">DDR4-2133</option>
-          <option value="ddr4-2400">DDR4-2400</option>
-          <option value="ddr4-2666">DDR4-2666</option>
-          <option value="ddr4-3000">DDR4-3000</option>
-          <option value="ddr4-3200" selected>DDR4-3200</option>
-          <option value="ddr4-3600">DDR4-3600</option>
-          <option value="ddr5-4800">DDR5-4800</option>
-          <option value="ddr5-5200">DDR5-5200</option>
-          <option value="ddr5-5600">DDR5-5600</option>
-          <option value="ddr5-6000">DDR5-6000</option>
-          <option value="ddr5-6400">DDR5-6400</option>
-          <option value="ddr5-7200">DDR5-7200</option>
-          <option value="ddr5-8000">DDR5-8000</option>
-          <option value="ddr5-8800">DDR5-8800</option>
-          <option value="ddr5-9600">DDR5-9600</option>
-          <option value="lpddr5">LPDDR5</option>
-          <option value="lpddr5x">LPDDR5X</option>
-          <option value="lpddr6">LPDDR6</option>
-          <option value="lpddr6x">LPDDR6X</option>
-        </select>
-      </div>
+  <section class="pf-card reveal">
+    <h2><span class="ico">📋</span> Result</h2>
+    <div class="pf-hero-fps">
+      <div class="num" id="verdictNum">—</div>
+      <div class="unit" id="verdictUnit">—</div>
+      <div class="pf-verdict" id="verdict"></div>
     </div>
-
-    <div class="row">
-      <div>
-        <label>SSD size</label>
-        <select id="ssdSize">
-          <option value="64">64 GB</option>
-          <option value="128">128 GB</option>
-          <option value="256">256 GB</option>
-          <option value="512">512 GB</option>
-          <option value="1024" selected>1 TB</option>
-          <option value="2048">2 TB</option>
-          <option value="4096">4 TB</option>
-        </select>
-      </div>
-      <div>
-        <p class="note">
-          <span class="tag tag-info">No FPS here – only compatibility check</span>
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Game selection -->
-  <div class="ics-frame">
-    <h2>Game Selection</h2>
-    <p>Select Game!.</p>
-
-    <div class="row">
-      <div>
-        <label>Game</label>
-        <select id="game"></select>
-      </div>
-      <div>
-        <label>Target resolution (info only)</label>
-        <select id="resolution">
-          <option value="1080p">1080p</option>
-          <option value="1440p" selected>1440p</option>
-          <option value="4K">4K</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- Result -->
-  <div class="ics-frame">
-    <h2>Can You Run It?</h2>
-    <button onclick="checkRequirements()">Check</button>
-
-    <div id="result" class="result-box" style="display:none;"></div>
-    <div id="details" class="details"></div>
-  </div>
+    <div class="pf-section-title">Requirement breakdown</div>
+    <div class="pf-scroll"><table class="pf-table" id="table"></table></div>
+    <div class="pf-section-title">What to expect in-game</div>
+    <div class="pf-grid pf-grid-3" id="perf"></div>
+    <div class="pf-summary" id="summary"></div>
+  </section>
 
 </div>
 
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
 <script>
-/* CPU SCORES – same scale as FPS Estimator */
-const cpuScores = {
-  "Regent GX 9-9995RX4D": 26000,
-  "Regent GX 7-9750RX3": 21000,
+const S = { cpu: "9600x", gpu: "rtx4060", game: "fh6", ramGb: 16, storage: "nvme4" };
 
-  "AMD Ryzen 7 9850X3D": 23300,
-  "AMD Ryzen 7 9800X3D": 23000,
-  "AMD Ryzen 9 9950X3D": 22000,
-  "AMD Ryzen 9 9900X3D": 21000,
+fillSelect(document.getElementById("cpu"), CPUS.filter(c => !c.integrated), { groupKey: "brand", value: S.cpu });
+fillSelect(document.getElementById("gpu"), GPUS, { groupKey: "brand", value: S.gpu, labelFn: g => `${g.name} — ${g.vram} GB` });
+fillSelect(document.getElementById("game"), GAMES, { groupKey: "genre", value: S.game });
+fillSelect(document.getElementById("ramAmount"), RAM_AMOUNTS.map(a => ({ id: a, name: a + " GB" })), { value: 16 });
+fillEnumSelect(document.getElementById("storageType"), STORAGE_TYPES, S.storage);
 
-  "AMD Ryzen 5 7500F": 7600,
+function run() {
+  const cpu = cpuById(S.cpu), gpu = gpuById(S.gpu), game = gameById(S.game);
+  document.getElementById("gameName").textContent = game.name;
 
-  "AMD Ryzen Threadripper PRO 9955WX": 14700,
-  "AMD Ryzen Threadripper PRO 9995WX": 23500,
+  const block = canRunGame(gpu, game);
+  const rows = [];
+  const add = (label, yours, min, rec, ok, note) => rows.push({ label, yours, min, rec, ok, note });
 
-  "Intel Core i9-14900K": 18500,
-  "Intel Core Ultra 9 285K": 17000,
-  "Intel Core Ultra 7 270K": 14000,
-  "Intel Core i5-12400F": 9000
-};
+  /* CPU */
+  const cpuMin = cpu.gaming >= game.minCpu, cpuRec = cpu.gaming >= game.recCpu;
+  add("CPU", `${cpu.name}<br><span class="pf-mono c-dim">gaming index ${cpu.gaming}</span>`,
+      `index ${game.minCpu}`, `index ${game.recCpu}`,
+      cpuMin ? (cpuRec ? "pass" : "warn") : "fail",
+      cpuRec ? "Above recommended." : cpuMin ? "Meets the minimum but not the recommended." : "Below the minimum — expect severe stutter and long stalls.");
 
-/* GPU DATA – score only needed here */
-const gpuData = {
-  "Regent VX 6690": { score: 36000 },
-  "Regent VX 6670": { score: 30000 },
+  /* GPU */
+  const gpuMin = gpu.index >= game.minGpu, gpuRec = gpu.index >= game.recGpu;
+  add("GPU", `${gpu.name}<br><span class="pf-mono c-dim">raster index ${gpu.index}</span>`,
+      `index ${game.minGpu}`, `index ${game.recGpu}`,
+      gpuMin ? (gpuRec ? "pass" : "warn") : "fail",
+      gpuRec ? "Above recommended." : gpuMin ? "Meets the minimum but not the recommended." : "Below the minimum.");
 
-  "NVIDIA RTX 5090": { score: 36000 },
-  "NVIDIA RTX 5080": { score: 32000 },
-  "NVIDIA RTX 5070 Ti": { score: 28000 },
-  "NVIDIA RTX 5070": { score: 25000 },
-  "NVIDIA RTX 5060 Ti": { score: 21000 },
-  "NVIDIA RTX 5060": { score: 18000 },
-  "NVIDIA RTX 5050": { score: 15000 },
+  /* VRAM */
+  const needed = vramRequired(game, "1440p", "high", "off", "off");
+  const vramOk = gpu.vram >= needed * 0.9;
+  add("VRAM", `${gpu.vram} GB ${gpu.vramType}`,
+      `${(needed * 0.7).toFixed(1)} GB (1080p)`, `${needed.toFixed(1)} GB (1440p high)`,
+      gpu.vram >= needed ? "pass" : vramOk ? "warn" : "fail",
+      gpu.vram >= needed ? "Enough for 1440p High without spilling."
+        : vramOk ? "Tight — fine at 1080p, will spill at 1440p High."
+        : "Not enough. Expect texture pop-in and stutter at 1440p.");
 
-  "NVIDIA RTX 4090": { score: 32000 },
-  "NVIDIA RTX 4080 Super": { score: 27000 },
-  "NVIDIA RTX 4070 Ti Super": { score: 22000 },
-  "NVIDIA RTX 4070": { score: 18000 },
+  /* RAM */
+  const ramOk = S.ramGb >= game.minRam, ramRec = S.ramGb >= game.recRam;
+  add("System RAM", `${S.ramGb} GB`, `${game.minRam} GB`, `${game.recRam} GB`,
+      ramOk ? (ramRec ? "pass" : "warn") : "fail",
+      ramRec ? "Comfortable." : ramOk ? "Meets the minimum; close background apps." : "Below minimum — the game may not launch.");
 
-  "AMD RX 9070 XT": { score: 25000 },
-  "AMD RX 9070": { score: 22000 },
-  "AMD RX 9060 XT": { score: 19000 },
-  "AMD RX 9060": { score: 16000 }
-};
+  /* Storage */
+  const st = STORAGE_TYPES[S.storage];
+  const needsSSD = game.storage === "ssd";
+  add("Storage", st.label, needsSSD ? "SSD required" : "HDD acceptable", "NVMe recommended",
+      needsSSD && S.storage === "hdd" ? "fail" : S.storage === "hdd" || S.storage === "sata" ? "warn" : "pass",
+      needsSSD && S.storage === "hdd" ? "This title requires an SSD; on a hard drive it streams too slowly to be playable."
+        : S.storage === "hdd" ? "It will run, but load times and streaming will suffer."
+        : `${fmt(st.mbps)} MB/s sequential — fine for this game.`);
 
-/* RAM AMOUNTS */
-const ramAmounts = [4, 8, 12, 16, 32, 64, 128];
+  /* Install size */
+  add("Install size", "—", `${game.sizeGB} GB free`, `${game.sizeGB + 20} GB free`,
+      "pass", "Make sure the drive has room for patches too.");
 
-/* RAM SPEED MULTIPLIERS – info only here, men vi kan bruke senere hvis vi vil */
-const ramSpeedMultipliers = {
-  "ddr4-2133": 0.92,
-  "ddr4-2400": 0.94,
-  "ddr4-2666": 0.96,
-  "ddr4-3000": 0.98,
-  "ddr4-3200": 1.00,
-  "ddr4-3600": 1.03,
-
-  "ddr5-4800": 1.05,
-  "ddr5-5200": 1.07,
-  "ddr5-5600": 1.09,
-  "ddr5-6000": 1.10,
-  "ddr5-6400": 1.12,
-  "ddr5-7200": 1.13,
-  "ddr5-8000": 1.15,
-  "ddr5-8800": 1.16,
-  "ddr5-9600": 1.17,
-
-  "lpddr5": 1.05,
-  "lpddr5x": 1.08,
-  "lpddr6": 1.12,
-  "lpddr6x": 1.20
-};
-
-/* GAME REQUIREMENTS – basert på databasen vi lagde */
-const gameRequirements = {
-  "GTA V": {
-    minCpu: 6500,
-    recCpu: 9000,
-    minGpu: 4500,
-    recGpu: 14000,
-    minRam: 8,
-    recRam: 16,
-    minSsd: 105,
-    ssdRequiredMin: true,
-    ssdRequiredRec: true
-  },
-  "Cyberpunk 2077": {
-    minCpu: 7500,
-    recCpu: 15000,
-    minGpu: 7000,
-    recGpu: 13000,
-    minRam: 12,
-    recRam: 16,
-    minSsd: 70,
-    ssdRequiredMin: true,
-    ssdRequiredRec: true
-  },
-  "Microsoft Flight Simulator 2024": {
-    minCpu: 8000,
-    recCpu: 14000,
-    minGpu: 11000,
-    recGpu: 18000,
-    minRam: 16,
-    recRam: 32,
-    minSsd: 50,
-    ssdRequiredMin: false,
-    ssdRequiredRec: false
-  },
-  "Forza Horizon 6": {
-    minCpu: 8000,
-    recCpu: 9000,
-    minGpu: 5500,
-    recGpu: 15000,
-    minRam: 16,
-    recRam: 16,
-    minSsd: 167,
-    ssdRequiredMin: true,
-    ssdRequiredRec: true
-  },
-  "Forza Horizon 5": {
-    minCpu: 6500,
-    recCpu: 8000,
-    minGpu: 6000,
-    recGpu: 9000,
-    minRam: 8,
-    recRam: 16,
-    minSsd: 110,
-    ssdRequiredMin: false,
-    ssdRequiredRec: false
-  },
-  "Rust": {
-    minCpu: 6000,
-    recCpu: 12000,
-    minGpu: 7000,
-    recGpu: 14000,
-    minRam: 12,
-    recRam: 16,
-    minSsd: 45,
-    ssdRequiredMin: false,
-    ssdRequiredRec: true
-  },
-  "CS2": {
-    minCpu: 2500,
-    recCpu: 2500,
-    minGpu: 2000,
-    recGpu: 2000,
-    minRam: 8,
-    recRam: 8,
-    minSsd: 85,
-    ssdRequiredMin: false,
-    ssdRequiredRec: false
-  },
-  "Overwatch 2": {
-    minCpu: 3000,
-    recCpu: 9000,
-    minGpu: 2000,
-    recGpu: 7000,
-    minRam: 6,
-    recRam: 8,
-    minSsd: 50,
-    ssdRequiredMin: false,
-    ssdRequiredRec: false
-  },
-  "Apex Legends": {
-    minCpu: 3500,
-    recCpu: 9000,
-    minGpu: 3000,
-    recGpu: 6000,
-    minRam: 6,
-    recRam: 8,
-    minSsd: 75,
-    ssdRequiredMin: false,
-    ssdRequiredRec: false
-  },
-  "ARK: Survival Ascended": {
-    minCpu: 8000,
-    recCpu: 10500,
-    minGpu: 11000,
-    recGpu: 20000,
-    minRam: 16,
-    recRam: 32,
-    minSsd: 180,
-    ssdRequiredMin: true,
-    ssdRequiredRec: true
-  },
-  "Valorant": {
-    minCpu: 3000,
-    recCpu: 6000,
-    minGpu: 2000,
-    recGpu: 4000,
-    minRam: 4,
-    recRam: 8,
-    minSsd: 20,
-    ssdRequiredMin: false,
-    ssdRequiredRec: false
-  },
-  "GTA VI (Estimated)": {
-    minCpu: 10500,
-    recCpu: 15000,
-    minGpu: 14000,
-    recGpu: 20000,
-    minRam: 16,
-    recRam: 16,
-    minSsd: 150,
-    ssdRequiredMin: true,
-    ssdRequiredRec: true
-  },
-  "Roblox": {
-    minCpu: 2000,
-    recCpu: 6000,
-    minGpu: 1500,
-    recGpu: 5000,
-    minRam: 4,
-    recRam: 8,
-    minSsd: 5,
-    ssdRequiredMin: false,
-    ssdRequiredRec: false
+  /* RT capability */
+  if (gameSupportsRT(game)) {
+    add("Ray tracing", isRT(gpu) ? "Supported" : "No RT hardware", "Optional", "Optional",
+        isRT(gpu) ? "pass" : "warn",
+        isRT(gpu) ? `${game.name} supports ray tracing and so does your card.`
+                  : `Your card has no RT hardware, so ray tracing is unavailable in ${game.name}.`);
   }
-};
-
-/* Populate selectors */
-function loadSelectors() {
-  const cpuSel  = document.getElementById("cpu");
-  const gpuSel  = document.getElementById("gpu");
-  const gameSel = document.getElementById("game");
-  const ramSel  = document.getElementById("ramAmount");
-
-  Object.keys(cpuScores).forEach(c => cpuSel.innerHTML += `<option>${c}</option>`);
-  Object.keys(gpuData).forEach(g => gpuSel.innerHTML += `<option>${g}</option>`);
-  Object.keys(gameRequirements).forEach(g => gameSel.innerHTML += `<option>${g}</option>`);
-
-  ramAmounts.forEach(r => ramSel.innerHTML += `<option value="${r}">${r} GB</option>`);
-
-  cpuSel.value  = "AMD Ryzen 7 9800X3D";
-  gpuSel.value  = "NVIDIA RTX 5070";
-  gameSel.value = "Forza Horizon 6";
-  ramSel.value  = 16;
-}
-loadSelectors();
-
-/* Result class */
-function getResultClass(status) {
-  if (status === "no") return "res-no";
-  if (status === "yes-ok") return "res-yesok";
-  return "res-yes";
-}
-
-/* Main check */
-function checkRequirements() {
-  const cpuName = document.getElementById("cpu").value;
-  const gpuName = document.getElementById("gpu").value;
-  const gameName = document.getElementById("game").value;
-  const ramGb = parseInt(document.getElementById("ramAmount").value);
-  const ssdGb = parseInt(document.getElementById("ssdSize").value);
-  const res = document.getElementById("resolution").value;
-  const ramSpeedKey = document.getElementById("ramSpeed").value;
-
-  const cpuScore = cpuScores[cpuName] || 0;
-  const gpuScore = (gpuData[gpuName] && gpuData[gpuName].score) || 0;
-  const gameReq = gameRequirements[gameName];
-
-  const resultEl = document.getElementById("result");
-  const detailsEl = document.getElementById("details");
-
-  if (!gameReq) {
-    resultEl.style.display = "block";
-    resultEl.className = "result-box res-no";
-    resultEl.innerText = "Unknown game requirements.";
-    detailsEl.innerHTML = "";
-    return;
+  if (gameSupportsPT(game)) {
+    add("Path tracing", isRT(gpu) ? game.pt.name : "Unavailable", "Optional", "Optional",
+        isRT(gpu) ? (gpu.vram >= 16 ? "pass" : "warn") : "fail",
+        isRT(gpu) ? (gpu.vram >= 16 ? "Your VRAM is large enough to attempt it." : "Works, but path tracing needs a lot of VRAM — expect spill on a " + gpu.vram + " GB card.")
+                  : "Path tracing requires RT hardware.");
   }
 
-  const meetsCpuMin = cpuScore >= gameReq.minCpu;
-  const meetsGpuMin = gpuScore >= gameReq.minGpu;
-  const meetsRamMin = ramGb >= gameReq.minRam;
-  const meetsSsdMin = ssdGb >= gameReq.minSsd;
+  /* hard blocks */
+  if (!block.ok) rows.unshift({ label: "Launch", yours: gpu.name, min: "—", rec: "—", ok: "fail", note: block.reason });
 
-  const meetsCpuRec = cpuScore >= gameReq.recCpu;
-  const meetsGpuRec = gpuScore >= gameReq.recGpu;
-  const meetsRamRec = ramGb >= gameReq.recRam;
-  const meetsSsdRec = ssdGb >= gameReq.minSsd; // samme plass for rec
+  const fails = rows.filter(r => r.ok === "fail").length;
+  const warns = rows.filter(r => r.ok === "warn").length;
 
-  let status;
-  let headline;
-  let explanation = [];
+  const num = document.getElementById("verdictNum");
+  const unit = document.getElementById("verdictUnit");
+  const v = document.getElementById("verdict");
 
-  if (!meetsCpuMin || !meetsGpuMin || !meetsRamMin || !meetsSsdMin) {
-    status = "no";
-    headline = "NO – Your PC does not meet minimum requirements.";
-
-    if (!meetsCpuMin) explanation.push("• CPU is below minimum requirement.");
-    if (!meetsGpuMin) explanation.push("• GPU is below minimum requirement.");
-    if (!meetsRamMin) explanation.push("• RAM is below minimum requirement.");
-    if (!meetsSsdMin) explanation.push(`• Not enough SSD space (requires at least ${gameReq.minSsd} GB).`);
-
-    if (gameReq.ssdRequiredMin) {
-      explanation.push("• This game requires an SSD – HDD is not recommended.");
-    }
-  } else if (meetsCpuRec && meetsGpuRec && meetsRamRec && meetsSsdRec) {
-    status = "yes";
-    headline = "YES – You can run it comfortably (Recommended or better).";
-
-    explanation.push("• Your CPU meets or exceeds the recommended requirement.");
-    explanation.push("• Your GPU meets or exceeds the recommended requirement.");
-    explanation.push("• Your RAM is at or above the recommended amount.");
-    explanation.push("• You have enough SSD space for the game.");
-
-    if (gameReq.ssdRequiredRec) {
-      explanation.push("• SSD is recommended/required for best loading times.");
-    }
-
-    explanation.push(`• At ${res}, you should be able to play on High/Ultra with good settings (avhenger av spillet).`);
+  if (fails) {
+    num.className = "num c-red glow-red"; num.textContent = "NO";
+    unit.textContent = "does not meet the minimum requirements";
+    v.className = "pf-verdict c-red"; v.textContent = `${fails} requirement${fails > 1 ? "s" : ""} not met`;
+  } else if (warns >= 2) {
+    num.className = "num c-orange glow-orange"; num.textContent = "YES";
+    unit.textContent = "but only on reduced settings";
+    v.className = "pf-verdict c-orange"; v.textContent = `${warns} areas below recommended`;
   } else {
-    status = "yes-ok";
-    headline = "YES – But you may need to lower some settings.";
-
-    if (meetsCpuMin && !meetsCpuRec) explanation.push("• CPU meets minimum but is below recommended.");
-    if (meetsGpuMin && !meetsGpuRec) explanation.push("• GPU meets minimum but is below recommended.");
-    if (meetsRamMin && !meetsRamRec) explanation.push("• RAM meets minimum but is below recommended.");
-    if (meetsSsdMin && !meetsSsdRec) explanation.push("• You have enough SSD space, but not a lot of headroom.");
-
-    if (gameReq.ssdRequiredMin) {
-      explanation.push("• SSD is required – you have enough space, but make sure that your disk isn't full.");
-    }
-
-    explanation.push(`• You can run the game, but you should use Medium/Low settings, specially in ${res}.`);
+    num.className = "num c-green glow-green"; num.textContent = "YES";
+    unit.textContent = "comfortably, at high or ultra settings";
+    v.className = "pf-verdict c-green"; v.textContent = "all requirements met";
   }
 
-  // ekstra info for Roblox
-  if (gameName === "Roblox") {
-    if (status === "yes" || status === "yes-ok") {
-      explanation.push("• Roblox is very light – in almost any cases, you can use High/Ultra graphics without any problems");
-    }
+  document.getElementById("table").innerHTML = `
+    <thead><tr><th>Requirement</th><th>You have</th><th>Minimum</th><th>Recommended</th><th>Status</th></tr></thead>
+    <tbody>${rows.map(r => `
+      <tr>
+        <td class="spec-label">${r.label}</td>
+        <td>${r.yours}</td>
+        <td class="c-dim">${r.min}</td>
+        <td class="c-dim">${r.rec}</td>
+        <td><span class="pf-chip ${r.ok === "pass" ? "green" : r.ok === "warn" ? "orange" : "red"}">${r.ok === "pass" ? "OK" : r.ok === "warn" ? "MARGINAL" : "FAIL"}</span>
+          <div class="pf-stat-note">${r.note}</div></td>
+      </tr>`).join("")}</tbody>`;
+
+  /* what to expect */
+  const e1080 = estimate({ cpu: S.cpu, gpu: S.gpu, game: S.game, resolution: "1080p", quality: "high", rt: "off", ramGb: S.ramGb, ramSpeed: "ddr5-6000" });
+  const e1440 = estimate({ cpu: S.cpu, gpu: S.gpu, game: S.game, resolution: "1440p", quality: "ultra", rt: "off", ramGb: S.ramGb, ramSpeed: "ddr5-6000" });
+  const e1440rt = estimate({ cpu: S.cpu, gpu: S.gpu, game: S.game, resolution: "1440p", quality: "ultra", rt: gameSupportsRT(game) ? "high" : "off", ramGb: S.ramGb, ramSpeed: "ddr5-6000" });
+  const cell = (r, title) => r.blocked ? "" : `
+    <div class="pf-stat">
+      <div class="pf-stat-label">${title}</div>
+      <div class="pf-stat-value ${fpsClass(r.fps).cls}">${r.fps}<small> fps</small></div>
+      <div class="pf-stat-note">${r.vram.state === "over" ? `<span class="c-red">VRAM spilling ${r.vram.overflow.toFixed(1)} GB</span>` : r.vram.required.toFixed(1) + " GB VRAM"}</div>
+    </div>`;
+  document.getElementById("perf").innerHTML =
+    cell(e1080, "1080p High") + cell(e1440, "1440p Ultra") + cell(e1440rt, gameSupportsRT(game) ? "1440p Ultra + RT High" : "4K High");
+  if (!e1440.blocked) {
+    document.getElementById("perf").querySelectorAll(".pf-stat-value").forEach((el, i) => {
+      const vals = [e1080, e1440, e1440rt];
+      if (vals[i]) animateNumber(el, vals[i].fps, { suffix: "" });
+    });
   }
 
-  // ekstra info for veldig tunge spill
-  if (gameName === "Microsoft Flight Simulator 2024" || gameName.startsWith("GTA VI") || gameName.startsWith("Cyberpunk")) {
-    explanation.push("• This is a very heavy game – altough your PC can run this game, FPS may vary a lot");
-  }
-
-  resultEl.style.display = "block";
-  resultEl.className = "result-box " + getResultClass(status);
-  resultEl.innerText = headline;
-
-  detailsEl.innerHTML = `
-    <strong>Game:</strong> ${gameName}<br>
-    <strong>Your CPU score:</strong> ${cpuScore} (min ${gameReq.minCpu}, rec ${gameReq.recCpu})<br>
-    <strong>Your GPU score:</strong> ${gpuScore} (min ${gameReq.minGpu}, rec ${gameReq.recGpu})<br>
-    <strong>Your RAM:</strong> ${ramGb} GB (min ${gameReq.minRam}, rec ${gameReq.recRam})<br>
-    <strong>Your SSD:</strong> ${ssdGb} GB (min ${gameReq.minSsd} GB)<br>
-    <strong>RAM speed:</strong> ${ramSpeedKey.toUpperCase()}<br><br>
-    ${explanation.join("<br>")}
-  `;
+  document.getElementById("summary").innerHTML = fails
+    ? `<b>You cannot run ${game.name} properly on this system.</b> ${rows.filter(r => r.ok === "fail").map(r => r.note).join(" ")}`
+    : warns
+      ? `<b>${game.name} will run.</b> You are below the recommended spec in ${warns} area(s): ${rows.filter(r => r.ok === "warn").map(r => r.label).join(", ")}. Expect to trade settings for smoothness — the <a class="c-gold" href="optimizer.html">Settings Optimizer</a> will find the best combination for you.`
+      : `<b>You are comfortably above the requirements for ${game.name}.</b> Nothing here will hold you back. ${game.notes} <a class="c-gold" href="fps.html">Estimate your frame rate →</a>`;
 }
-</script>
 
+["cpu", "gpu", "game"].forEach(id => on(id, "change", () => { S[id] = val(id); run(); }));
+on("ramAmount", "change", () => { S.ramGb = num("ramAmount", 16); run(); });
+on("storageType", "change", () => { S.storage = val("storageType"); run(); });
+on("run", "click", () => { run(); toast("Requirements checked"); });
+
+run();
+</script>
 </body>
 </html>

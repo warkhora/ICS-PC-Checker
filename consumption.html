@@ -2,907 +2,178 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ICS Regent – Power Consumption Analyzer</title>
-
-<style>
-  body {
-    margin: 0;
-    padding: 40px;
-    background: linear-gradient(135deg, #050505, #000000);
-    color: #e6e6e6;
-    font-family: "Segoe UI", system-ui, sans-serif;
-  }
-
-  .ics-container {
-    max-width: 1100px;
-    margin: auto;
-    backdrop-filter: blur(18px);
-  }
-
-  .ics-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .ics-logo {
-    font-size: 32px;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    color: #ffd700;
-    font-weight: 600;
-  }
-
-  .ics-subtitle {
-    color: #bbb;
-    margin-top: 8px;
-    font-size: 15px;
-  }
-
-  .ics-frame {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 25px;
-    margin-bottom: 30px;
-    border-radius: 18px;
-    transition: 0.3s ease;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.08);
-  }
-
-  .ics-frame:hover {
-    border-color: rgba(255, 215, 0, 0.6);
-    box-shadow: 0 0 35px rgba(255, 215, 0, 0.25);
-    transform: translateY(-3px);
-  }
-
-  select, button, input {
-    width: 100%;
-    background: rgba(20, 20, 20, 0.85);
-    color: #eee;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    padding: 12px;
-    border-radius: 10px;
-    margin: 10px 0;
-    transition: 0.2s;
-    font-size: 15px;
-    backdrop-filter: blur(12px);
-    box-sizing: border-box;
-  }
-
-  select:hover, button:hover, input:hover {
-    border-color: #ffd700;
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
-  }
-
-  select option {
-    background: #111;
-    color: #eee;
-  }
-
-  button {
-    cursor: pointer;
-    background: rgba(255, 215, 0, 0.15);
-    font-weight: 600;
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .row-3 {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .ics-nav {
-    width: 100%;
-    background: rgba(0,0,0,0.65);
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    padding: 16px 24px;
-    display: flex;
-    gap: 30px;
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    backdrop-filter: blur(12px);
-    margin: -40px -40px 40px -40px;
-  }
-
-  .ics-nav a {
-    color: #ffd700;
-    text-decoration: none;
-    font-size: 16px;
-    letter-spacing: 1px;
-    transition: 0.25s ease;
-    padding-bottom: 4px;
-  }
-
-  .ics-nav a:hover {
-    color: white;
-    text-shadow: 0 0 10px #ffd700;
-  }
-
-  .ics-nav a.active {
-    color: white;
-    border-bottom: 2px solid #ffd700;
-    text-shadow: 0 0 12px #ffd700;
-  }
-
-      /* ▼ MORE MENU DROPDOWN */
-.nav-more {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.nav-more-btn {
-  color: #ffd700;
-  cursor: pointer;
-  font-size: 16px;
-  letter-spacing: 1px;
-  padding-bottom: 4px;
-  transition: 0.25s ease;
-}
-
-.nav-more-btn:hover {
-  color: white;
-  text-shadow: 0 0 10px #ffd700;
-}
-
-.nav-more-menu {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 14px;
-  padding: 10px;
-  width: 220px;
-  display: none;
-  flex-direction: column;
-  box-shadow: 0 0 25px rgba(255,215,0,0.15);
-  z-index: 9999;
-}
-
-.nav-more-menu a {
-  color: #ffd700;
-  text-decoration: none;
-  padding: 8px 10px;
-  border-radius: 10px;
-  transition: 0.25s ease;
-  display: block;
-  font-size: 14px;
-}
-
-.nav-more-menu a:hover {
-  background: rgba(255,255,255,0.08);
-  color: white;
-  text-shadow: 0 0 10px #ffd700;
-}
-
-
-  .tag {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    margin-right: 6px;
-    border: 1px solid rgba(255,255,255,0.2);
-  }
-
-  .tag-info { color: #7dd3fc; border-color: #0ea5e9; }
-
-  .section-title {
-    font-size: 15px;
-    font-weight: 600;
-    margin-top: 18px;
-    margin-bottom: 6px;
-    color: #f5f5f5;
-  }
-
-  .result-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-    margin-top: 10px;
-  }
-
-  .result-pill {
-    background: rgba(0,0,0,0.7);
-    border-radius: 14px;
-    padding: 12px 14px;
-    border: 1px solid rgba(255,255,255,0.18);
-    font-size: 13px;
-  }
-
-  .result-label {
-    font-weight: 600;
-    color: #ffd700;
-    margin-bottom: 4px;
-  }
-
-  .result-value {
-    font-size: 20px;
-    font-weight: 700;
-  }
-
-  .note {
-    font-size: 12px;
-    color: #cfcfcf;
-    margin-top: 4px;
-  }
-
-  .bar-outer {
-    width: 100%;
-    height: 26px;
-    border-radius: 999px;
-    background: rgba(0,0,0,0.85);
-    border: 1px solid rgba(255,255,255,0.18);
-    overflow: hidden;
-    position: relative;
-    margin-top: 6px;
-  }
-
-  .bar-inner {
-    height: 100%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #00ff9d, #ffd700, #ff4b4b);
-    transition: width 0.4s ease;
-  }
-
-  .bar-label {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 600;
-    text-shadow: 0 0 6px rgba(0,0,0,0.9);
-  }
-
-  .power-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    font-size: 13px;
-  }
-
-  .power-table th {
-    background: rgba(0,0,0,0.85);
-    padding: 10px;
-    border-bottom: 2px solid rgba(255,255,255,0.18);
-    text-align: left;
-  }
-
-  .power-table td {
-    padding: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .ai-summary {
-    margin-top: 10px;
-    font-size: 13px;
-    color: #d0d0d0;
-    line-height: 1.6;
-  }
-
-  .small-label {
-    font-size: 12px;
-    color: #ccc;
-  }
-
-  @media (max-width: 900px) {
-    .row, .row-3, .result-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Power Consumption — PCFORGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/theme.css">
 </head>
 <body>
 
-<div class="ics-nav">
-  <a href="index.html" class="nav-link" data-page="index">CPU/GPU Comparison</a>
-  <a href="fps.html" class="nav-link" data-page="fps">FPS Estimator</a>
-  <a href="canyourunit.html" class="nav-link" data-page="canyourunit">Can You Run It?</a>
-  <a href="build.html" class="nav-link" data-page="build">Build Your PC</a>
-  <a href="pclifetime.html" class="nav-link" data-page="pclifetime">PC Lifespan</a>
-  <a href="thermals.html" class="nav-link" data-page="thermals">Thermal & Cooling</a>
-  <a href="consumption.html" class="nav-link" data-page="consumption">Power Consumption</a>
-  <a href="storage.html" class="nav-link" data-page="storage">Storage & Load Times</a>
+<div class="pf-container">
 
-  <!-- ▼ NEW DROPDOWN BUTTON (INSIDE NAV!) -->
-  <div class="nav-more">
-    <span class="nav-more-btn">More ▼</span>
-    <div class="nav-more-menu">
-      <a href="bottleneck.html">Bottleneck Analyzer</a>
-      <a href="future1.html">Future Tool 1</a>
-      <a href="future2.html">Future Tool 2</a>
-      <a href="future3.html">Future Tool 3</a>
+  <header class="pf-hero">
+    <div class="pf-eyebrow">● Watts &amp; kroner</div>
+    <h1>Power Consumption</h1>
+    <p>What the system actually pulls from the wall, whether your power supply is the right
+       size, and what a year of gaming costs at your electricity price.</p>
+  </header>
+
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">⚡</span> System &amp; usage</h2>
+    <div class="pf-grid pf-grid-2">
+      <div><label class="pf-label" for="cpu">CPU</label><select id="cpu"></select></div>
+      <div><label class="pf-label" for="gpu">GPU</label><select id="gpu"></select></div>
     </div>
-  </div>
-</div>
-
-<script>
-  const current = window.location.pathname.split("/").pop().toLowerCase();
-  document.querySelectorAll(".nav-link").forEach(link => {
-    if (current.includes(link.getAttribute("data-page"))) {
-      link.classList.add("active");
-    }
-  });
-</script>
-
-  <script>
-  const moreBtn = document.querySelector(".nav-more-btn");
-  const moreMenu = document.querySelector(".nav-more-menu");
-
-  moreBtn.addEventListener("click", () => {
-    moreMenu.style.display = moreMenu.style.display === "flex" ? "none" : "flex";
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".nav-more")) {
-      moreMenu.style.display = "none";
-    }
-  });
-</script>
-
-<div class="ics-container">
-
-  <div class="ics-header">
-    <div class="ics-logo">ICS REGENT</div>
-    <div class="ics-subtitle">Power Consumption Analyzer — System Wattage & PSU Headroom</div>
-  </div>
-
-  <!-- INPUT FRAME -->
-  <div class="ics-frame">
-    <div class="tag tag-info">Consumption v1</div>
-    <h2 style="margin-top:10px;">Power Scenario</h2>
-    <p style="font-size:13px;color:#ccc;margin-bottom:14px;">
-      Select your CPU, GPU, workload and PSU. The analyzer estimates idle, gaming and heavy load power draw,
-      peak spikes and a safe PSU recommendation in watts.
-    </p>
-
-    <div class="row">
-      <div>
-        <label>CPU</label>
-        <select id="cpu"></select>
-      </div>
-      <div>
-        <label>GPU</label>
-        <select id="gpu"></select>
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>PSU Wattage</label>
-        <select id="psu">
-          <option value="550">550W</option>
-          <option value="650">650W</option>
-          <option value="750" selected>750W</option>
-          <option value="850">850W</option>
-          <option value="1000">1000W</option>
-          <option value="1200">1200W</option>
-        </select>
-      </div>
-      <div>
-        <label>PSU Efficiency Rating</label>
+    <div class="pf-grid pf-grid-3" style="margin-top:14px;">
+      <div><label class="pf-label" for="psu">Power supply</label><select id="psu"></select></div>
+      <div><label class="pf-label" for="efficiency">PSU efficiency</label>
         <select id="efficiency">
-          <option value="0.82">80+ Bronze</option>
-          <option value="0.87">80+ Gold</option>
-          <option value="0.90" selected>80+ Platinum</option>
-          <option value="0.92">80+ Titanium</option>
+          <option value="0.82">80+ Bronze (82%)</option>
+          <option value="0.87" selected>80+ Gold (87%)</option>
+          <option value="0.90">80+ Platinum (90%)</option>
+          <option value="0.92">80+ Titanium (92%)</option>
         </select>
       </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>Workload Profile</label>
+      <div><label class="pf-label" for="intensity">Workload</label>
         <select id="intensity">
-          <option value="idle">Mostly idle / desktop</option>
-          <option value="gaming" selected>Gaming (mixed CPU/GPU)</option>
-          <option value="cpuheavy">CPU-heavy (rendering, compiling)</option>
-          <option value="gpuheavy">GPU-heavy (ray tracing, path tracing)</option>
+          <option value="idle">Desktop / idle</option>
+          <option value="gaming" selected>Gaming</option>
+          <option value="cpuheavy">CPU-heavy (render / compile)</option>
+          <option value="gpuheavy">GPU-heavy (path tracing, ML)</option>
         </select>
       </div>
-      <div>
-        <label>Case & Extras</label>
+    </div>
+    <div class="pf-grid pf-grid-3" style="margin-top:14px;">
+      <div><label class="pf-label" for="price">Electricity price (per kWh)</label><input type="number" id="price" value="0.25" step="0.01" min="0"></div>
+      <div><label class="pf-label" for="hours">Hours per day</label><input type="number" id="hours" value="3" step="0.5" min="0"></div>
+      <div><label class="pf-label" for="extras">System extras</label>
         <select id="extras">
-          <option value="light">Light system (few drives, few fans)</option>
-          <option value="normal" selected>Typical gaming PC</option>
-          <option value="heavy">Heavy system (many fans, RGB, extra drives)</option>
+          <option value="40">Minimal — few fans, one drive</option>
+          <option value="65" selected>Typical gaming PC</option>
+          <option value="95">Heavy — many fans, RGB, several drives</option>
         </select>
       </div>
     </div>
+    <button class="pf-btn" id="run">Estimate power draw</button>
+  </section>
 
-    <div class="section-title">Game Scenario (for gaming load)</div>
-    <div class="row-3">
-      <div>
-        <label>Game</label>
-        <select id="game">
-          <option value="cyberpunk">Cyberpunk 2077</option>
-          <option value="gta6">GTA VI</option>
-          <option value="starfield">Starfield</option>
-          <option value="helldivers2">Helldivers 2</option>
-          <option value="rdr2">Red Dead Redemption 2</option>
-          <option value="cod">Call of Duty</option>
-          <option value="eldenring">Elden Ring</option>
-          <option value="fortnite">Fortnite</option>
-          <option value="msfs2024">Flight Simulator 2024</option>
-          <option value="bg3">Baldur's Gate 3</option>
-          <option value="witcher4">The Witcher 4 (future)</option>
-          <option value="fh5">Forza Horizon 5</option>
-          <option value="fh6" selected>Forza Horizon 6</option>
-        </select>
-      </div>
-      <div>
-        <label>Graphics Preset</label>
-        <select id="preset">
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="ultra">Ultra</option>
-          <option value="rt">Ray Tracing</option>
-          <option value="pt">Path Tracing</option>
-        </select>
-      </div>
-      <div>
-        <label>Resolution</label>
-        <select id="resolution">
-          <option value="1080">1080p</option>
-          <option value="1440" selected>1440p</option>
-          <option value="2160">4K</option>
-          <option value="3440x1440">Ultrawide 3440×1440</option>
-          <option value="8k">8K (extreme)</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>Electricity Price (optional, per kWh)</label>
-        <input type="number" id="price" value="0.25" step="0.01">
-      </div>
-      <div>
-        <label>Daily Gaming Hours (for cost estimate)</label>
-        <input type="number" id="hours" value="2" step="0.5">
-      </div>
-    </div>
-
-    <button onclick="simulatePower()">Estimate Power Consumption</button>
-  </div>
-
-  <!-- RESULT FRAME -->
-  <div class="ics-frame" id="resultFrame" style="display:none;">
-    <h2>Power Draw & PSU Recommendation</h2>
-
-    <div class="small-label" id="scenarioLabel"></div>
-
-    <div class="result-grid">
-      <div class="result-pill">
-        <div class="result-label">Gaming Power Draw</div>
-        <div class="result-value" id="gamingPowerLabel"></div>
-        <div class="bar-outer">
-          <div class="bar-inner" id="gamingPowerBar"></div>
-          <div class="bar-label" id="gamingPowerBarLabel"></div>
-        </div>
-        <div class="note" id="gamingNote"></div>
-      </div>
-
-      <div class="result-pill">
-        <div class="result-label">Peak / Transient Power</div>
-        <div class="result-value" id="peakPowerLabel"></div>
-        <div class="bar-outer">
-          <div class="bar-inner" id="peakPowerBar"></div>
-          <div class="bar-label" id="peakPowerBarLabel"></div>
-        </div>
-        <div class="note" id="peakNote"></div>
-      </div>
-
-      <div class="result-pill">
-        <div class="result-label">PSU Headroom & Cost</div>
-        <div class="result-value" id="psuHeadroomLabel"></div>
-        <div class="bar-outer">
-          <div class="bar-inner" id="psuHeadroomBar"></div>
-          <div class="bar-label" id="psuHeadroomBarLabel"></div>
-        </div>
-        <div class="note" id="costNote"></div>
-      </div>
-    </div>
-
-    <div class="section-title">Component Power Breakdown</div>
-    <table class="power-table" id="powerTable"></table>
-
-    <div class="section-title">Power Narrative</div>
-    <div class="ai-summary" id="powerSummary"></div>
-  </div>
+  <section class="pf-card reveal">
+    <h2><span class="ico">🔌</span> Results</h2>
+    <div class="pf-grid pf-grid-4" id="stats"></div>
+    <div class="pf-section-title">PSU loading</div>
+    <div id="psuBar"></div>
+    <div class="pf-note" id="psuNote"></div>
+    <div class="pf-section-title">Where the watts go</div>
+    <div id="chart"></div>
+    <div class="pf-section-title">Cost over time</div>
+    <div class="pf-scroll"><table class="pf-table" id="costs"></table></div>
+    <div class="pf-summary" id="summary"></div>
+  </section>
 
 </div>
 
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
 <script>
-// =========================
-// CPU DATABASE (same as thermals)
-// =========================
-const cpuDb = [
-  { name: "Intel Core i5-14400F", tdp: 125 },
-  { name: "Intel Core i5-14600K", tdp: 165 },
-  { name: "Intel Core i7-14700K", tdp: 200 },
-  { name: "Intel Core i9-14900K", tdp: 250 },
+const S = { cpu: "9800x3d", gpu: "rtx5070", psu: 750, eff: 0.87, intensity: "gaming", price: 0.25, hours: 3, extras: 65 };
 
-  { name: "Ryzen 5 9600X", tdp: 120 },
-  { name: "Ryzen 7 9700X", tdp: 130 },
-  { name: "Ryzen 7 9800X3D", tdp: 140 },
-  { name: "Ryzen 9 9900X3D", tdp: 170 },
-  { name: "Ryzen 9 9950X3D", tdp: 190 },
+fillSelect(document.getElementById("cpu"), CPUS.filter(c => !c.integrated), { groupKey: "brand", value: S.cpu });
+fillSelect(document.getElementById("gpu"), GPUS, { groupKey: "brand", value: S.gpu, labelFn: g => `${g.name} — ${g.tdp} W` });
+fillSelect(document.getElementById("psu"), PSUS.map(w => ({ id: w, name: w + " W" })), { value: 750 });
 
-  { name: "Threadripper 7960X", tdp: 270 },
-  { name: "Threadripper 7970X", tdp: 300 },
-  { name: "Threadripper 7980X", tdp: 350 },
-
-  { name: "Intel Ultra 5", tdp: 140 },
-  { name: "Intel Ultra 7", tdp: 180 },
-  { name: "Intel Ultra 9", tdp: 230 }
-];
-
-// =========================
-// GPU DATABASE (same as thermals)
-// =========================
-const gpuDb = [
-  { name: "GeForce RTX 3050 6GB", tdp: 115, arch: "ampere" },
-  { name: "GeForce RTX 3050 8GB", tdp: 130, arch: "ampere" },
-  { name: "GeForce RTX 3060", tdp: 170, arch: "ampere" },
-  { name: "GeForce RTX 3060 Ti", tdp: 200, arch: "ampere" },
-  { name: "GeForce RTX 3070", tdp: 220, arch: "ampere" },
-  { name: "GeForce RTX 3070 Ti", tdp: 290, arch: "ampere" },
-  { name: "GeForce RTX 3080", tdp: 320, arch: "ampere" },
-  { name: "GeForce RTX 3080 Ti", tdp: 350, arch: "ampere" },
-  { name: "GeForce RTX 3090", tdp: 350, arch: "ampere" },
-
-  { name: "GeForce RTX 4050", tdp: 115, arch: "ada" },
-  { name: "GeForce RTX 4060", tdp: 140, arch: "ada" },
-  { name: "GeForce RTX 4060 Ti", tdp: 160, arch: "ada" },
-  { name: "GeForce RTX 4070", tdp: 200, arch: "ada" },
-  { name: "GeForce RTX 4070 Super", tdp: 220, arch: "ada" },
-  { name: "GeForce RTX 4070 Ti", tdp: 285, arch: "ada" },
-  { name: "GeForce RTX 4070 Ti Super", tdp: 295, arch: "ada" },
-  { name: "GeForce RTX 4080", tdp: 320, arch: "ada" },
-  { name: "GeForce RTX 4080 Super", tdp: 340, arch: "ada" },
-  { name: "GeForce RTX 4080 Ti", tdp: 360, arch: "ada" },
-  { name: "GeForce RTX 4080 Ti Super", tdp: 380, arch: "ada" },
-  { name: "GeForce RTX 4090", tdp: 450, arch: "ada" },
-
-  { name: "GeForce RTX 5050", tdp: 140, arch: "blackwell" },
-  { name: "GeForce RTX 5060", tdp: 170, arch: "blackwell" },
-  { name: "GeForce RTX 5060 Ti 8GB", tdp: 190, arch: "blackwell" },
-  { name: "GeForce RTX 5060 Ti 16GB", tdp: 210, arch: "blackwell" },
-  { name: "GeForce RTX 5070", tdp: 240, arch: "blackwell" },
-  { name: "GeForce RTX 5070 Ti", tdp: 280, arch: "blackwell" },
-  { name: "GeForce RTX 5080", tdp: 340, arch: "blackwell" },
-  { name: "GeForce RTX 5090", tdp: 480, arch: "blackwell" },
-
-  { name: "Radeon RX 9060", tdp: 220, arch: "rdna4" },
-  { name: "Radeon RX 9060 XT", tdp: 250, arch: "rdna4" },
-  { name: "Radeon RX 9070", tdp: 280, arch: "rdna4" },
-  { name: "Radeon RX 9070 XT", tdp: 320, arch: "rdna4" },
-
-  { name: "Radeon RX 7900", tdp: 260, arch: "rdna3" },
-  { name: "Radeon RX 7900 XT", tdp: 300, arch: "rdna3" },
-  { name: "Radeon RX 7900 XTX", tdp: 355, arch: "rdna3" }
-];
-
-// =========================
-// GAME / PRESET MODEL (same base as thermals)
-// =========================
-const gameDb = {
-  cyberpunk:   { baseGpu: 0.85, baseCpu: 0.65 },
-  gta6:        { baseGpu: 0.8,  baseCpu: 0.7  },
-  starfield:   { baseGpu: 0.9,  baseCpu: 0.7  },
-  helldivers2: { baseGpu: 0.8,  baseCpu: 0.75 },
-  rdr2:        { baseGpu: 0.75, baseCpu: 0.6  },
-  cod:         { baseGpu: 0.8,  baseCpu: 0.7  },
-  eldenring:   { baseGpu: 0.7,  baseCpu: 0.6  },
-  fortnite:    { baseGpu: 0.6,  baseCpu: 0.55 },
-  msfs2024:    { baseGpu: 0.9,  baseCpu: 0.85 },
-  bg3:         { baseGpu: 0.7,  baseCpu: 0.6  },
-  witcher4:    { baseGpu: 0.9,  baseCpu: 0.75 },
-  fh5:         { baseGpu: 0.75, baseCpu: 0.6  },
-  fh6:         { baseGpu: 0.85, baseCpu: 0.65 }
+const LOAD = {
+  idle:     { cpu: 0.12, gpu: 0.08, cpuFloor: 18, gpuFloor: 12 },
+  gaming:   { cpu: 0.55, gpu: 0.95, cpuFloor: 0,  gpuFloor: 0 },
+  cpuheavy: { cpu: 1.00, gpu: 0.12, cpuFloor: 0,  gpuFloor: 0 },
+  gpuheavy: { cpu: 0.35, gpu: 1.00, cpuFloor: 0,  gpuFloor: 0 }
 };
 
-function presetMultiplier(preset) {
-  if (preset === "low")    return { gpu: 0.55, cpu: 0.55 };
-  if (preset === "medium") return { gpu: 0.7,  cpu: 0.6  };
-  if (preset === "high")   return { gpu: 0.85, cpu: 0.7  };
-  if (preset === "ultra")  return { gpu: 0.95, cpu: 0.8  };
-  if (preset === "rt")     return { gpu: 1.05, cpu: 0.85 };
-  if (preset === "pt")     return { gpu: 1.15, cpu: 0.9  };
-  return { gpu: 0.8, cpu: 0.7 };
+function estimatePower() {
+  const cpu = cpuById(S.cpu), gpu = gpuById(S.gpu);
+  const l = LOAD[S.intensity];
+  const cpuW = Math.max(l.cpuFloor, Math.round(cpu.ppt * l.cpu));
+  const gpuW = Math.max(l.gpuFloor, Math.round(gpu.tdp * l.gpu));
+  const dcW = cpuW + gpuW + S.extras;
+  const wallW = Math.round(dcW / S.eff);
+  const lostW = wallW - dcW;
+  const loadPct = wallW / S.psu * 100;
+  const transient = Math.round(dcW + (gpu.tdp >= 300 ? gpu.tdp * 0.8 : gpu.tdp * 0.35));
+  /* Anchor to vendor guidance (roughly 1.9× the GPU's TGP plus the CPU package),
+     and never go below 1.35× the measured load. */
+  const recommended = Math.max(
+    Math.ceil((gpu.tdp * 1.9 + (cpu.ppt || cpu.tdp)) / 50) * 50,
+    Math.ceil(dcW * 1.35 / 50) * 50
+  );
+
+  document.getElementById("stats").innerHTML = `
+    <div class="pf-stat"><div class="pf-stat-label">Component draw (DC)</div>
+      <div class="pf-stat-value">${fmt(dcW)}<small> W</small></div>
+      <div class="pf-stat-note">CPU ${cpuW} W + GPU ${gpuW} W + ${S.extras} W system</div></div>
+    <div class="pf-stat"><div class="pf-stat-label">From the wall</div>
+      <div class="pf-stat-value c-gold">${fmt(wallW)}<small> W</small></div>
+      <div class="pf-stat-note">${Math.round(S.eff * 100)}% efficient — ${lostW} W becomes heat</div></div>
+    <div class="pf-stat"><div class="pf-stat-label">Transient peak</div>
+      <div class="pf-stat-value ${transient > S.psu ? "c-red" : ""}">≈${fmt(transient)}<small> W</small></div>
+      <div class="pf-stat-note">Sub-millisecond GPU power spikes</div></div>
+    <div class="pf-stat"><div class="pf-stat-label">Yearly cost</div>
+      <div class="pf-stat-value c-green">${(wallW / 1000 * S.hours * 365 * S.price).toFixed(0)}<small> /year</small></div>
+      <div class="pf-stat-note">${S.hours} h/day at ${S.price}/kWh</div></div>`;
+
+  const tone = loadPct > 100 ? "red" : loadPct > 85 ? "" : loadPct > 70 ? "" : "green";
+  document.getElementById("psuBar").innerHTML = `
+    <div class="pf-stat">
+      <div class="pf-stat-label">Sustained load on the ${S.psu} W supply</div>
+      <div class="pf-stat-value ${loadPct > 100 ? "c-red" : loadPct > 85 ? "c-orange" : "c-green"}">${loadPct.toFixed(0)}<small>%</small></div>
+      <div class="pf-bar ${tone}"><i style="width:${clamp(loadPct, 0, 100)}%"></i></div>
+      <div class="pf-stat-note">Efficiency peaks between 40% and 70% load. Below 20% or above 90% you are throwing money away as heat.</div>
+    </div>`;
+
+  document.getElementById("psuNote").className = "pf-note " + (loadPct > 100 ? "red" : loadPct > 85 || transient > S.psu ? "" : "green");
+  document.getElementById("psuNote").innerHTML = loadPct > 100
+    ? `<b>The supply is overloaded.</b> ${fmt(wallW)} W on a ${S.psu} W unit. It will shut down under load or trip its over-current protection. You need at least ${recommended} W.`
+    : transient > S.psu
+      ? `<b>Marginal.</b> Sustained load fits, but transient peaks reach ≈${fmt(transient)} W. Older or budget units trip their OCP here. ${recommended} W removes the risk.`
+      : loadPct > 85
+        ? `It works, but the supply runs at ${loadPct.toFixed(0)}% — outside the efficiency sweet spot and with no room for a future GPU. ${recommended} W would be the comfortable choice.`
+        : `Well sized. ${loadPct.toFixed(0)}% sustained load keeps the supply in its efficient range with room for transients. Recommended minimum for this system: ${recommended} W.`;
+
+  document.getElementById("chart").innerHTML = sparkline([cpuW, gpuW, S.extras, lostW], ["CPU", "GPU", "System", "Lost as<br>PSU heat"], 1);
+  mountCharts(document.getElementById("chart"));
+
+  const kwhDay = wallW / 1000 * S.hours;
+  document.getElementById("costs").innerHTML = `
+    <thead><tr><th>Period</th><th>Energy</th><th>Cost</th><th>Equivalent</th></tr></thead>
+    <tbody>
+      <tr><td class="spec-label">Per hour</td><td class="pf-mono">${(wallW / 1000).toFixed(3)} kWh</td><td class="pf-mono">${(wallW / 1000 * S.price).toFixed(3)}</td><td>—</td></tr>
+      <tr><td class="spec-label">Per gaming session (${S.hours} h)</td><td class="pf-mono">${kwhDay.toFixed(2)} kWh</td><td class="pf-mono">${(kwhDay * S.price).toFixed(2)}</td><td>—</td></tr>
+      <tr><td class="spec-label">Per month</td><td class="pf-mono">${(kwhDay * 30).toFixed(1)} kWh</td><td class="pf-mono">${(kwhDay * 30 * S.price).toFixed(2)}</td><td>≈ ${(kwhDay * 30 / 60).toFixed(0)} loads of laundry</td></tr>
+      <tr><td class="spec-label">Per year</td><td class="pf-mono">${(kwhDay * 365).toFixed(0)} kWh</td><td class="pf-mono"><b class="c-green">${(kwhDay * 365 * S.price).toFixed(2)}</b></td><td>≈ ${(kwhDay * 365 / 1500).toFixed(1)} round-trip flights' worth of nothing</td></tr>
+    </tbody>`;
+
+  const annual = kwhDay * 365 * S.price;
+  document.getElementById("summary").innerHTML = `
+    <b>Reading the numbers.</b> The ${cpu.name} and ${gpu.name} together draw <b>${fmt(dcW)} W</b> while
+    ${S.intensity === "idle" ? "sitting on the desktop" : S.intensity === "gaming" ? "gaming" : S.intensity === "cpuheavy" ? "rendering" : "running a GPU-heavy workload"}.
+    Your ${S.eff >= 0.9 ? "platinum/titanium" : S.eff >= 0.87 ? "gold" : "bronze"} supply wastes <b>${lostW} W</b> converting that from the wall —
+    ${Math.round(lostW / Math.max(dcW, 1) * 100)}% overhead, which lands directly in your case as heat.
+    <br><br><b>Cost:</b> ${S.hours} hours a day works out to <b>${annual.toFixed(0)} per year</b> at ${S.price} per kWh
+    — roughly ${(annual / 12).toFixed(2)} a month. Upgrading to a titanium-rated supply would save
+    ${(kwhDay * 365 * S.price * (1 / S.eff - 1 / 0.92)).toFixed(0)} a year — usually less than the price difference over the life of the unit.
+    <br><br><b>Sizing:</b> aim for <b>${recommended} W</b>. That covers the ${fmt(transient)} W transient peak modern GPUs produce
+    and keeps the supply in its 40–70% efficiency window.${S.intensity === "gaming" ? ` Note that a CPU-limited system draws noticeably less than this — the GPU cannot spend power it is not being given work for.` : ""}`;
 }
 
-function resolutionMultiplier(res) {
-  if (res === "1080")        return 0.7;
-  if (res === "1440")        return 0.85;
-  if (res === "2160")        return 1.0;
-  if (res === "3440x1440")   return 0.95;
-  if (res === "8k")          return 1.25;
-  return 0.85;
-}
+["cpu", "gpu", "intensity"].forEach(id => on(id, "change", () => { S[id] = val(id); estimatePower(); }));
+on("psu", "change", () => { S.psu = num("psu", 750); estimatePower(); });
+on("efficiency", "change", () => { S.eff = num("efficiency", 0.87); estimatePower(); });
+on("price", "input", () => { S.price = num("price", 0.25); estimatePower(); });
+on("hours", "input", () => { S.hours = num("hours", 3); estimatePower(); });
+on("extras", "change", () => { S.extras = num("extras", 65); estimatePower(); });
+on("run", "click", () => { estimatePower(); toast("Power draw estimated"); });
 
-// =========================
-// POPULATE SELECTS
-// =========================
-function populateSelects() {
-  const cpuSel = document.getElementById("cpu");
-  const gpuSel = document.getElementById("gpu");
-
-  cpuDb.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.name;
-    opt.textContent = c.name;
-    cpuSel.appendChild(opt);
-  });
-
-  gpuDb.forEach(g => {
-    const opt = document.createElement("option");
-    opt.value = g.name;
-    opt.textContent = g.name;
-    gpuSel.appendChild(opt);
-  });
-
-  cpuSel.value = "Ryzen 7 9800X3D";
-  gpuSel.value = "GeForce RTX 5080";
-}
-populateSelects();
-
-// =========================
-// WORKLOAD MODEL
-// =========================
-function baseLoad(intensity) {
-  if (intensity === "idle")     return { cpu: 0.08, gpu: 0.05 };
-  if (intensity === "gaming")   return { cpu: 0.45, gpu: 0.75 };
-  if (intensity === "cpuheavy") return { cpu: 0.95, gpu: 0.25 };
-  if (intensity === "gpuheavy") return { cpu: 0.35, gpu: 0.98 };
-  return { cpu: 0.5, gpu: 0.5 };
-}
-
-function extrasPower(extras) {
-  if (extras === "light")  return 35;  // board + 1 SSD + 2 fans
-  if (extras === "normal") return 55;  // board + 2 SSD + 4 fans + RGB
-  if (extras === "heavy")  return 80;  // many fans, RGB, extra drives
-  return 55;
-}
-
-// =========================
-// MAIN POWER SIMULATION
-// =========================
-function simulatePower() {
-  const cpuName = document.getElementById("cpu").value;
-  const gpuName = document.getElementById("gpu").value;
-  const psuWatt = Number(document.getElementById("psu").value);
-  const eff = Number(document.getElementById("efficiency").value);
-  const intensity = document.getElementById("intensity").value;
-  const extras = document.getElementById("extras").value;
-
-  const gameKey = document.getElementById("game").value;
-  const preset = document.getElementById("preset").value;
-  const res = document.getElementById("resolution").value;
-
-  const price = Number(document.getElementById("price").value || 0);
-  const hours = Number(document.getElementById("hours").value || 0);
-
-  const cpu = cpuDb.find(c => c.name === cpuName);
-  const gpu = gpuDb.find(g => g.name === gpuName);
-  const game = gameDb[gameKey];
-
-  const base = baseLoad(intensity);
-  const pMul = presetMultiplier(preset);
-  const rMul = resolutionMultiplier(res);
-
-  // Game-aware loads for gaming profile
-  let cpuLoad = base.cpu;
-  let gpuLoad = base.gpu;
-
-  if (intensity === "gaming") {
-    cpuLoad = Math.min(1.0, base.cpu * game.baseCpu * pMul.cpu);
-    gpuLoad = Math.min(1.2, base.gpu * game.baseGpu * pMul.gpu * rMul);
-  }
-
-  // RTX 5090 efficiency tweak
-  if (gpu.name === "GeForce RTX 5090") {
-    gpuLoad *= 0.95;
-  }
-
-  // Idle power
-  const idleCpu = cpu.tdp * 0.08;
-  const idleGpu = gpu.tdp * 0.06;
-  const idleExtras = extrasPower(extras) * 0.5;
-  const idleTotal = idleCpu + idleGpu + idleExtras;
-
-  // Gaming power
-  const gamingCpu = cpu.tdp * cpuLoad;
-  const gamingGpu = gpu.tdp * gpuLoad;
-  const gamingExtras = extrasPower(extras);
-  const gamingTotal = gamingCpu + gamingGpu + gamingExtras;
-
-  // Heavy / stress power
-  const heavyCpu = cpu.tdp * Math.min(1.1, base.cpu * 1.1);
-  const heavyGpu = gpu.tdp * Math.min(1.1, base.gpu * 1.1);
-  const heavyExtras = extrasPower(extras) * 1.1;
-  const heavyTotal = heavyCpu + heavyGpu + heavyExtras;
-
-  // Peak transient spikes (especially for RTX 40/50)
-  let transientFactor = 1.15;
-  if (gpu.arch === "ada" || gpu.arch === "blackwell") transientFactor = 1.25;
-  const peakTotal = gamingTotal * transientFactor;
-
-  // Wall power (PSU efficiency)
-  const gamingWall = gamingTotal / eff;
-  const peakWall = peakTotal / eff;
-
-  // PSU headroom
-  const headroomGaming = psuWatt - gamingWall;
-  const headroomPeak = psuWatt - peakWall;
-
-  let headroomLabel = "";
-  if (headroomPeak < 0) headroomLabel = "Insufficient PSU";
-  else if (headroomPeak < psuWatt * 0.1) headroomLabel = "Very tight headroom";
-  else if (headroomPeak < psuWatt * 0.25) headroomLabel = "Moderate headroom";
-  else headroomLabel = "Comfortable headroom";
-
-  // Cost estimate
-  let costNote = "No electricity price provided, cost estimate skipped.";
-  if (price > 0 && hours > 0) {
-    const dailyKWh = (gamingWall * hours) / 1000;
-    const monthlyCost = dailyKWh * 30 * price;
-    costNote = `At ~${gamingWall.toFixed(0)}W during gaming for ${hours}h/day, monthly cost is about ${monthlyCost.toFixed(2)} in your currency.`;
-  }
-
-  // Update UI
-  document.getElementById("resultFrame").style.display = "block";
-
-  const scenarioLabel = `
-    Scenario: ${gameNameLabel(gameKey)} @ ${resolutionLabel(res)}, ${presetLabel(preset)} preset
-    on ${cpu.name} + ${gpu.name}, with a ${psuWatt}W PSU (${efficiencyLabel(eff)}).
-  `.replace(/\s+/g, " ").trim();
-  document.getElementById("scenarioLabel").textContent = scenarioLabel;
-
-  // Gaming power pill
-  document.getElementById("gamingPowerLabel").textContent = Math.round(gamingWall) + " W (wall)";
-  const gamingPercent = Math.min(100, Math.max(0, (gamingWall / psuWatt) * 100));
-  document.getElementById("gamingPowerBar").style.width = gamingPercent + "%";
-  document.getElementById("gamingPowerBarLabel").textContent = gamingPercent.toFixed(0) + "% of PSU capacity";
-
-  let gamingNote = "Gaming power draw is well within PSU limits.";
-  if (gamingPercent > 80) gamingNote = "Gaming power draw is high relative to PSU capacity.";
-  else if (gamingPercent > 65) gamingNote = "Gaming power draw is moderate, but leaves some headroom.";
-  document.getElementById("gamingNote").textContent = gamingNote;
-
-  // Peak power pill
-  document.getElementById("peakPowerLabel").textContent = Math.round(peakWall) + " W (peak)";
-  const peakPercent = Math.min(120, Math.max(0, (peakWall / psuWatt) * 100));
-  document.getElementById("peakPowerBar").style.width = Math.min(100, peakPercent) + "%";
-  document.getElementById("peakPowerBarLabel").textContent = peakPercent.toFixed(0) + "% of PSU capacity (peak)";
-
-  let peakNote = "Transient spikes are within safe limits for this PSU.";
-  if (headroomPeak < 0) peakNote = "Peak spikes exceed PSU rating — risk of shutdown or instability.";
-  else if (peakPercent > 95) peakNote = "Peak spikes are very close to PSU limit — consider a higher wattage unit.";
-  else if (peakPercent > 80) peakNote = "Peak spikes are noticeable but generally acceptable.";
-  document.getElementById("peakNote").textContent = peakNote;
-
-  // PSU headroom pill
-  document.getElementById("psuHeadroomLabel").textContent = headroomLabel;
-  const headroomPercent = Math.max(0, Math.min(100, (headroomPeak / psuWatt) * 100 + 50));
-  document.getElementById("psuHeadroomBar").style.width = headroomPercent + "%";
-  document.getElementById("psuHeadroomBarLabel").textContent =
-    `${Math.max(0, Math.round(headroomPeak))} W headroom at peak`;
-  document.getElementById("costNote").textContent = costNote;
-
-  // Power breakdown table
-  let rows = `
-    <tr>
-      <th>Scenario</th>
-      <th>CPU Power</th>
-      <th>GPU Power</th>
-      <th>Other Components</th>
-      <th>Total (DC)</th>
-      <th>Wall Power</th>
-    </tr>
-    <tr>
-      <td>Idle / Desktop</td>
-      <td>${idleCpu.toFixed(0)} W</td>
-      <td>${idleGpu.toFixed(0)} W</td>
-      <td>${idleExtras.toFixed(0)} W</td>
-      <td>${idleTotal.toFixed(0)} W</td>
-      <td>${(idleTotal / eff).toFixed(0)} W</td>
-    </tr>
-    <tr>
-      <td>Gaming (${gameNameLabel(gameKey)})</td>
-      <td>${gamingCpu.toFixed(0)} W</td>
-      <td>${gamingGpu.toFixed(0)} W</td>
-      <td>${gamingExtras.toFixed(0)} W</td>
-      <td>${gamingTotal.toFixed(0)} W</td>
-      <td>${gamingWall.toFixed(0)} W</td>
-    </tr>
-    <tr>
-      <td>Heavy / Stress</td>
-      <td>${heavyCpu.toFixed(0)} W</td>
-      <td>${heavyGpu.toFixed(0)} W</td>
-      <td>${heavyExtras.toFixed(0)} W</td>
-      <td>${heavyTotal.toFixed(0)} W</td>
-      <td>${(heavyTotal / eff).toFixed(0)} W</td>
-    </tr>
-  `;
-  document.getElementById("powerTable").innerHTML = rows;
-
-  // Narrative
-  const intensityLabel =
-    intensity === "idle"     ? "mostly idle and light desktop workloads" :
-    intensity === "gaming"   ? "typical gaming workloads" :
-    intensity === "cpuheavy" ? "heavy CPU-bound workloads" :
-    "extreme GPU-bound workloads";
-
-  const summary = `
-    This configuration pairs ${cpu.name} with ${gpu.name} and a ${psuWatt}W ${efficiencyLabel(eff)} PSU.
-    Under ${intensityLabel}, gaming power draw is estimated at around ${gamingWall.toFixed(0)}W from the wall,
-    with transient spikes up to roughly ${peakWall.toFixed(0)}W. ${peakNote} ${costNote}
-  `.replace(/\s+/g, " ").trim();
-
-  document.getElementById("powerSummary").textContent = summary;
-}
-
-// =========================
-// LABEL HELPERS
-// =========================
-function gameNameLabel(key) {
-  const map = {
-    cyberpunk: "Cyberpunk 2077",
-    gta6: "GTA VI",
-    starfield: "Starfield",
-    helldivers2: "Helldivers 2",
-    rdr2: "Red Dead Redemption 2",
-    cod: "Call of Duty",
-    eldenring: "Elden Ring",
-    fortnite: "Fortnite",
-    msfs2024: "Flight Simulator 2024",
-    bg3: "Baldur's Gate 3",
-    witcher4: "The Witcher 4",
-    fh5: "Forza Horizon 5",
-    fh6: "Forza Horizon 6"
-  };
-  return map[key] || key;
-}
-
-function presetLabel(p) {
-  if (p === "low") return "Low";
-  if (p === "medium") return "Medium";
-  if (p === "high") return "High";
-  if (p === "ultra") return "Ultra";
-  if (p === "rt") return "Ray Tracing";
-  if (p === "pt") return "Path Tracing";
-  return p;
-}
-
-function resolutionLabel(r) {
-  if (r === "1080") return "1080p";
-  if (r === "1440") return "1440p";
-  if (r === "2160") return "4K";
-  if (r === "3440x1440") return "Ultrawide 3440×1440";
-  if (r === "8k") return "8K";
-  return r;
-}
-
-function efficiencyLabel(e) {
-  if (e >= 0.92) return "80+ Titanium";
-  if (e >= 0.9)  return "80+ Platinum";
-  if (e >= 0.87) return "80+ Gold";
-  return "80+ Bronze";
-}
+estimatePower();
 </script>
-
 </body>
 </html>

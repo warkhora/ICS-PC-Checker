@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compatibility Checker — PCFORGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+
+<div class="pf-container">
+
+  <header class="pf-hero">
+    <div class="pf-eyebrow">● New tool</div>
+    <h1>Compatibility Checker</h1>
+    <p>Will it fit, will it boot, and will the power supply survive it? Socket, memory type,
+       cooler clearance, GPU length, radiator support and transient power spikes — all checked
+       before you spend a kroner.</p>
+  </header>
+
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">🔩</span> The parts list</h2>
+    <div class="pf-grid pf-grid-2">
+      <div><label class="pf-label" for="cpu">CPU</label><select id="cpu"></select></div>
+      <div><label class="pf-label" for="mobo">Motherboard</label><select id="mobo"></select></div>
+    </div>
+    <div class="pf-grid pf-grid-2" style="margin-top:14px;">
+      <div><label class="pf-label" for="gpu">GPU</label><select id="gpu"></select></div>
+      <div><label class="pf-label" for="ramType">Memory kit</label><select id="ramType"></select></div>
+    </div>
+    <div class="pf-grid pf-grid-2" style="margin-top:14px;">
+      <div><label class="pf-label" for="cooler">CPU cooler</label><select id="cooler"></select></div>
+      <div><label class="pf-label" for="caseSel">Case</label><select id="caseSel"></select></div>
+    </div>
+    <div class="pf-grid pf-grid-2" style="margin-top:14px;">
+      <div><label class="pf-label" for="psu">Power supply</label><select id="psu"></select></div>
+      <div><label class="pf-label" for="m2">NVMe drives installed</label>
+        <select id="m2"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select>
+      </div>
+    </div>
+    <button class="pf-btn" id="run">Check compatibility</button>
+  </section>
+
+  <section class="pf-card reveal">
+    <h2><span class="ico">🚦</span> Verdict</h2>
+    <div class="pf-hero-fps">
+      <div class="num" id="scoreNum">—</div>
+      <div class="unit">compatibility score</div>
+      <div class="pf-verdict" id="verdict"></div>
+    </div>
+    <div class="pf-section-title">Checklist</div>
+    <div class="pf-scroll"><table class="pf-table" id="checks"></table></div>
+    <div class="pf-section-title">Estimated power draw</div>
+    <div id="powerBars"></div>
+    <div class="pf-summary" id="summary"></div>
+  </section>
+
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
+<script>
+const S = { cpu: "9800x3d", mobo: 1, gpu: "rtx5070", ramType: "DDR5", cooler: 4, caseSel: 2, psu: 750, m2: 3 };
+
+fillSelect(document.getElementById("cpu"), CPUS.filter(c => !c.integrated), { groupKey: "brand", value: S.cpu });
+fillSelect(document.getElementById("gpu"), GPUS, { groupKey: "brand", value: S.gpu, labelFn: g => `${g.name} — ${g.length} mm, ${g.tdp} W` });
+fillSelect(document.getElementById("mobo"), MOTHERBOARDS.map((m, i) => ({ id: i, name: `${m.name} — ${m.socket}, ${m.ram}, ${m.form}` })), { value: 1 });
+fillSelect(document.getElementById("ramType"), [{ id: "DDR5", name: "DDR5 kit" }, { id: "DDR4", name: "DDR4 kit" }], { value: "DDR5" });
+fillSelect(document.getElementById("cooler"), COOLERS.map((c, i) => ({ id: i, name: `${c.name} — rated ${c.tdp} W` })), { value: 4 });
+fillSelect(document.getElementById("caseSel"), CASES.map((c, i) => ({ id: i, name: `${c.name} — GPU ≤ ${c.gpuMax} mm` })), { value: 2 });
+fillSelect(document.getElementById("psu"), PSUS.map(w => ({ id: w, name: w + " W" })), { value: 750 });
+
+const ICON = { pass: "✅", warn: "⚠️", fail: "❌" };
+
+function run() {
+  const cpu = cpuById(S.cpu);
+  const mobo = MOTHERBOARDS[S.mobo];
+  const gpu = gpuById(S.gpu);
+  const cooler = COOLERS[S.cooler];
+  const kase = CASES[S.caseSel];
+  const checks = [];
+
+  /* 1. Socket */
+  const socketOk = cpu.socket === mobo.socket;
+  checks.push({
+    pass: socketOk ? "pass" : "fail",
+    title: "CPU socket ↔ motherboard",
+    detail: socketOk
+      ? `${cpu.name} fits the ${mobo.socket} socket on the ${mobo.name}.`
+      : `The ${cpu.name} is <b>${cpu.socket}</b> but the ${mobo.name} is <b>${mobo.socket}</b>. It physically will not install.`,
+    fix: socketOk ? "" : `Pick a ${cpu.socket} motherboard, or a CPU made for ${mobo.socket}.`
+  });
+
+  /* 2. Memory type */
+  const ramOk = mobo.ram === S.ramType;
+  checks.push({
+    pass: ramOk ? "pass" : "fail",
+    title: "Memory type ↔ motherboard",
+    detail: ramOk
+      ? `${S.ramType} is supported — the board is rated up to ${mobo.ramMax}.`
+      : `You picked a <b>${S.ramType}</b> kit but the ${mobo.name} only takes <b>${mobo.ram}</b>. DDR4 and DDR5 are not interchangeable and the slots are keyed differently.`,
+    fix: ramOk ? "" : `Buy a ${mobo.ram} kit instead.`
+  });
+
+  /* 3. CPU memory support vs board */
+  const cpuDdr = (cpu.mem || "").includes("DDR5") ? "DDR5" : (cpu.mem || "").includes("DDR4") ? "DDR4" : "DDR5";
+  const cpuMemOk = (cpu.mem || "").includes("Unified") || cpu.mem.includes(cpuDdr);
+  checks.push({
+    pass: cpuMemOk ? "pass" : "warn",
+    title: "CPU memory controller",
+    detail: `${cpu.name} officially supports ${cpu.mem}.`,
+    fix: ""
+  });
+
+  /* 4. Cooler capacity */
+  const heat = cpu.ppt || cpu.tdp;
+  const coolOk = cooler.tdp >= heat;
+  checks.push({
+    pass: coolOk ? "pass" : "warn",
+    title: "Cooler capacity vs CPU power",
+    detail: `${cpu.name} pulls up to <b>${heat} W</b> (PPT). The ${cooler.name} is rated for <b>${cooler.tdp} W</b>.`,
+    fix: coolOk ? "" : `The cooler is undersized — the CPU will thermal-throttle. Use the <a class="c-gold" href="thermals.html">Thermal simulator</a> to see how bad it gets.`
+  });
+
+  /* 5. Cooler height / radiator vs case */
+  const fitsCooler = cooler.type === "aio" ? kase.radMax >= cooler.rad : cooler.height <= kase.coolerMax;
+  checks.push({
+    pass: fitsCooler ? "pass" : "fail",
+    title: cooler.type === "aio" ? "Radiator size vs case" : "Cooler height vs case",
+    detail: cooler.type === "aio"
+      ? `${cooler.rad} mm radiator — the ${kase.name} supports up to ${kase.radMax} mm.`
+      : `${cooler.height} mm tall — the ${kase.name} allows up to ${kase.coolerMax} mm.`,
+    fix: fitsCooler ? "" : "The cooler will not physically close the side panel."
+  });
+
+  /* 6. GPU length */
+  const fitsGpu = gpu.length <= kase.gpuMax;
+  checks.push({
+    pass: fitsGpu ? "pass" : "fail",
+    title: "GPU length vs case",
+    detail: `${gpu.name} is <b>${gpu.length} mm</b> long; the ${kase.name} allows <b>${kase.gpuMax} mm</b>.`,
+    fix: fitsGpu ? "" : `You need a shorter card or a bigger case — you are ${gpu.length - kase.gpuMax} mm over.`
+  });
+
+  /* 7. Power supply */
+  const extras = 60;                                        // board, fans, drives
+  const systemW = (cpu.ppt || cpu.tdp) + gpu.tdp + extras;
+  const spike = gpu.tdp >= 300 ? gpu.tdp * 0.8 : gpu.tdp * 0.35;  // ATX transient spikes
+  const peak = systemW + spike;
+  const recommended = Math.max(
+    Math.ceil((gpu.tdp * 1.9 + (cpu.ppt || cpu.tdp)) / 50) * 50,
+    Math.ceil(systemW * 1.35 / 50) * 50
+  );
+  const psuOk = S.psu >= peak;
+  const psuTight = psuOk && S.psu < systemW * 1.35;
+  checks.push({
+    pass: psuOk ? (psuTight ? "warn" : "pass") : "fail",
+    title: "Power supply headroom",
+    detail: `Typical load <b>${fmt(systemW)} W</b>, worst-case transient peak <b>≈${fmt(peak)} W</b>. Your unit is <b>${S.psu} W</b>.`,
+    fix: psuOk ? (psuTight ? `It will run, but ${S.psu} W leaves little margin. ${recommended} W is the comfortable choice.` : "")
+               : `Not enough. ${recommended} W is what this system actually wants.`
+  });
+
+  /* 8. PCIe generation / lanes */
+  const gpuLink = gpu.pcie || "PCIe 4.0 ×16";
+  const x8 = gpuLink.includes("×8");
+  checks.push({
+    pass: x8 && mobo.pcie === "3.0" ? "warn" : "pass",
+    title: "PCIe interface",
+    detail: `${gpu.name} uses ${gpuLink}; the ${mobo.name} provides PCIe ${mobo.pcie}.`,
+    fix: x8 && mobo.pcie === "3.0" ? "An ×8 card on a PCIe 3.0 board loses a few percent — measurable but not fatal." : ""
+  });
+
+  /* 9. M.2 slots */
+  const m2Ok = S.m2 <= mobo.m2;
+  checks.push({
+    pass: m2Ok ? "pass" : "fail",
+    title: "M.2 storage slots",
+    detail: `You want ${S.m2} NVMe drive(s); the ${mobo.name} has ${mobo.m2} M.2 slot(s).`,
+    fix: m2Ok ? "" : "Add a PCIe-to-M.2 adapter or pick a board with more slots."
+  });
+
+  /* 10. Bottleneck sanity */
+  const r = estimate({ cpu: S.cpu, gpu: S.gpu, game: "fh6", resolution: "1440p", quality: "ultra",
+                       rt: "off", upscaler: "off", fg: "off", ramGb: 32, ramSpeed: "ddr5-6000" });
+  const bn = r.blocked ? null : r.bottleneck;
+  /* Being GPU-limited is normal at 1440p and above — only flag it when it is extreme.
+     Being CPU-limited is the case where you actually wasted money on the GPU. */
+  const unbalanced = bn && ((bn.kind === "cpu" && bn.pct > 28) || (bn.kind === "gpu" && bn.pct > 65));
+  checks.push({
+    pass: unbalanced ? "warn" : "pass",
+    title: "Performance balance",
+    detail: bn ? `In Forza Horizon 6 at 1440p this pairing is <b>${bn.kind === "balanced" ? "well balanced" : bn.kind + "-limited by ≈" + bn.pct + "%"}</b>.` : "—",
+    fix: unbalanced ? `You are paying for ${bn.kind === "cpu" ? "GPU" : "CPU"} performance you cannot use. See the <a class="c-gold" href="bottleneck.html">Bottleneck Analyzer</a>.` : ""
+  });
+
+  /* ---- render ---- */
+  const fails = checks.filter(c => c.pass === "fail").length;
+  const warns = checks.filter(c => c.pass === "warn").length;
+  const score = Math.max(0, Math.round(100 - fails * 22 - warns * 7));
+
+  const num = document.getElementById("scoreNum");
+  num.className = "num " + (fails ? "c-red glow-red" : warns ? "c-orange glow-orange" : "c-green glow-green");
+  animateNumber(num, score);
+
+  const v = document.getElementById("verdict");
+  v.className = "pf-verdict " + (fails ? "c-red" : warns ? "c-orange" : "c-green");
+  v.textContent = fails ? `${fails} blocking problem${fails > 1 ? "s" : ""} — this will not build`
+                        : warns ? `Builds fine — ${warns} thing${warns > 1 ? "s" : ""} to watch`
+                                : "Fully compatible — build it";
+
+  document.getElementById("checks").innerHTML = `
+    <thead><tr><th></th><th>Check</th><th>Result</th></tr></thead>
+    <tbody>${checks.map(c => `
+      <tr>
+        <td style="font-size:16px;">${ICON[c.pass]}</td>
+        <td class="spec-label">${c.title}</td>
+        <td>${c.detail}${c.fix ? `<div class="pf-stat-note c-gold" style="margin-top:4px;">→ ${c.fix}</div>` : ""}</td>
+      </tr>`).join("")}</tbody>`;
+
+  document.getElementById("powerBars").innerHTML = `
+    <div class="pf-stat">
+      <div class="pf-stat-label">Typical gaming load</div>
+      <div class="pf-stat-value">${fmt(systemW)}<small> W of ${S.psu} W</small></div>
+      <div class="pf-bar ${systemW / S.psu > 0.85 ? "red" : systemW / S.psu > 0.65 ? "" : "green"}"><i></i></div>
+      <div class="pf-stat-note">${Math.round(systemW / S.psu * 100)}% of PSU capacity · efficiency sweet spot is 40–70%</div>
+    </div>
+    <div class="pf-stat" style="margin-top:12px;">
+      <div class="pf-stat-label">Transient peak (GPU power spikes)</div>
+      <div class="pf-stat-value">${fmt(peak)}<small> W</small></div>
+      <div class="pf-bar ${peak > S.psu ? "red" : ""}"><i></i></div>
+      <div class="pf-stat-note">Recommended PSU: <b>${recommended} W</b></div>
+    </div>`;
+  setBar(document.querySelectorAll("#powerBars .pf-bar > i")[0], systemW / S.psu * 100);
+  setBar(document.querySelectorAll("#powerBars .pf-bar > i")[1], Math.min(peak / S.psu * 100, 100));
+
+  const blockers = checks.filter(c => c.pass === "fail");
+  document.getElementById("summary").innerHTML = blockers.length
+    ? `<b>Do not order yet.</b> ${blockers.map(b => b.title).join(", ")} must be resolved first — these are physical incompatibilities, not tuning issues.`
+    : warns
+      ? `<b>This system builds and boots.</b> ${warns} warning${warns > 1 ? "s" : ""} worth reading before you commit — mostly headroom and clearance margins that are easy to fix now and expensive to fix later.`
+      : `<b>Everything checks out.</b> Socket, memory, cooler clearance, GPU length, storage slots and power all line up. The ${recommended} W figure gives you comfortable headroom for transient spikes.`;
+}
+
+["cpu", "gpu", "ramType"].forEach(id => on(id, "change", () => { S[id] = val(id); run(); }));
+["mobo", "cooler", "caseSel"].forEach(id => on(id, "change", () => { S[id] = num(id, 0); run(); }));
+on("psu", "change", () => { S.psu = num("psu", 750); run(); });
+on("m2", "change", () => { S.m2 = num("m2", 3); run(); });
+on("run", "click", () => { run(); toast("Compatibility checked"); });
+
+run();
+</script>
+</body>
+</html>

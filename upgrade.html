@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upgrade Advisor — PCFORGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+
+<div class="pf-container">
+
+  <header class="pf-hero">
+    <div class="pf-eyebrow">● New tool</div>
+    <h1>Upgrade Advisor</h1>
+    <p>Tell it what you have, what you play, and what you can spend. It simulates every
+       affordable GPU and CPU swap and ranks them by frames gained per dollar — including
+       the cost of a new motherboard and RAM when a CPU change forces a new platform.</p>
+  </header>
+
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">🧰</span> Your current system</h2>
+    <div class="pf-grid pf-grid-3">
+      <div><label class="pf-label" for="cpu">Current CPU</label><select id="cpu"></select></div>
+      <div><label class="pf-label" for="gpu">Current GPU</label><select id="gpu"></select></div>
+      <div><label class="pf-label" for="ramAmount">System RAM</label><select id="ramAmount"></select></div>
+    </div>
+    <div class="pf-grid pf-grid-3" style="margin-top:14px;">
+      <div><label class="pf-label" for="game">Main game</label><select id="game"></select></div>
+      <div><label class="pf-label" for="resolution">Resolution</label><select id="resolution"></select></div>
+      <div><label class="pf-label" for="budget">Budget (USD)</label><input type="number" id="budget" value="700" min="50" step="50"></div>
+    </div>
+    <button class="pf-btn" id="run">Find my best upgrade</button>
+  </section>
+
+  <section class="pf-card reveal">
+    <h2><span class="ico">📊</span> Baseline vs. upgrades</h2>
+    <div id="chart"></div>
+    <div class="pf-note" id="headline"></div>
+  </section>
+
+  <section class="pf-card reveal">
+    <h2><span class="ico">🥇</span> Ranked options</h2>
+    <div class="pf-scroll"><table class="pf-table" id="table"></table></div>
+    <div class="pf-summary" id="summary"></div>
+  </section>
+
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
+<script>
+const S = { cpu: "9600x", gpu: "rtx4060", game: "fh6", resolution: "1440p", budget: 700, ramGb: 16 };
+
+fillSelect(document.getElementById("cpu"), CPUS.filter(c => !c.integrated), { groupKey: "brand", value: S.cpu });
+fillSelect(document.getElementById("gpu"), GPUS, { groupKey: "brand", value: S.gpu, labelFn: g => `${g.name} — ${g.vram} GB` });
+fillSelect(document.getElementById("game"), GAMES, { groupKey: "genre", value: S.game });
+fillEnumSelect(document.getElementById("resolution"), RESOLUTIONS, S.resolution);
+fillSelect(document.getElementById("ramAmount"), RAM_AMOUNTS.map(a => ({ id: a, name: a + " GB" })), { value: 16 });
+
+/* A CPU move to a different socket needs a board + a memory kit. */
+const PLATFORM_COST = {
+  "AM5":     { board: 190, ram: 110, label: "AM5 board + DDR5 kit" },
+  "AM4":     { board: 110, ram: 60,  label: "AM4 board + DDR4 kit" },
+  "LGA 1851":{ board: 230, ram: 110, label: "LGA 1851 board + DDR5 kit" },
+  "LGA 1700":{ board: 160, ram: 100, label: "LGA 1700 board + memory kit" },
+  "sTR5":    { board: 700, ram: 400, label: "sTR5 board + RDIMM kit" },
+  "LGA 1151":{ board: 120, ram: 60,  label: "LGA 1151 board + DDR4 kit" },
+  "LGA 1200":{ board: 140, ram: 70,  label: "LGA 1200 board + DDR4 kit" }
+};
+
+function fpsFor(cpuId, gpuId) {
+  const r = estimate({ cpu: cpuId, gpu: gpuId, game: S.game, resolution: S.resolution,
+                       quality: "ultra", rt: gameSupportsRT(gameById(S.game)) ? "high" : "off",
+                       upscaler: "off", fg: "off", ramGb: S.ramGb, ramSpeed: "ddr5-6000" });
+  return r.blocked ? null : r;
+}
+
+function run() {
+  const base = fpsFor(S.cpu, S.gpu);
+  const curCpu = cpuById(S.cpu), curGpu = gpuById(S.gpu);
+  const opts = [];
+
+  /* ---- GPU swaps ---- */
+  GPUS.forEach(g => {
+    if (g.id === S.gpu || !g.price || g.price > S.budget) return;
+    if (g.index <= curGpu.index) return;
+    const r = fpsFor(S.cpu, g.id);
+    if (!r) return;
+    opts.push({ kind: "GPU", name: g.name, cost: g.price, fps: r.fps, r,
+                note: `${g.vram} GB ${g.vramType} · ${g.tdp} W · ${upscalerName(g)}` });
+  });
+
+  /* ---- CPU swaps (same socket = drop-in, otherwise a full platform move) ---- */
+  CPUS.filter(c => !c.integrated && c.price).forEach(c => {
+    if (c.id === S.cpu || c.price > S.budget) return;
+    if (c.gaming <= curCpu.gaming) return;
+    const sameSocket = c.socket === curCpu.socket;
+    const plat = sameSocket ? { board: 0, ram: 0, label: "drop-in, same socket" } : (PLATFORM_COST[c.socket] || { board: 180, ram: 100, label: "new board + memory" });
+    const cost = c.price + plat.board + plat.ram;
+    if (cost > S.budget) return;
+    const r = fpsFor(c.id, S.gpu);
+    if (!r) return;
+    opts.push({ kind: "CPU", name: c.name, cost, fps: r.fps, r,
+                note: `${c.cores}C/${c.threads}T · ${plat.label}` });
+  });
+
+  /* ---- RAM top-up ---- */
+  const game = gameById(S.game);
+  if (S.ramGb < game.recRam) {
+    const cost = Math.round((game.recRam - S.ramGb) * 3.2);
+    const r = estimate({ cpu: S.cpu, gpu: S.gpu, game: S.game, resolution: S.resolution,
+                         quality: "ultra", rt: gameSupportsRT(game) ? "high" : "off",
+                         upscaler: "off", fg: "off", ramGb: game.recRam, ramSpeed: "ddr5-6000" });
+    if (!r.blocked && cost <= S.budget) {
+      opts.push({ kind: "RAM", name: `Upgrade to ${game.recRam} GB`, cost, fps: r.fps, r,
+                  note: "Cheap, and fixes stutter more than average FPS" });
+    }
+  }
+
+  opts.forEach(o => {
+    o.gain = o.fps - base.fps;
+    o.pct = o.gain / base.fps * 100;
+    o.perDollar = o.gain / Math.max(o.cost, 1) * 100;
+  });
+  const viable = opts.filter(o => o.gain >= 2);
+  viable.sort((a, b) => b.perDollar - a.perDollar);
+
+  /* ---- chart ---- */
+  const top = viable.slice(0, 5);
+  const chartVals = [base.fps, ...top.map(o => o.fps)];
+  const chartLabs = ["Current", ...top.map(o => o.name.replace(/^(NVIDIA GeForce|AMD Radeon|AMD Ryzen|Intel Core|Upgrade to)/, "").trim())];
+  document.getElementById("chart").innerHTML = sparkline(chartVals, chartLabs, 0);
+  mountCharts(document.getElementById("chart"));
+
+  /* ---- headline ---- */
+  const hl = document.getElementById("headline");
+  if (!viable.length) {
+    hl.className = "pf-note red";
+    hl.innerHTML = `<b>Nothing in a $${fmt(S.budget)} budget moves the needle by 2 FPS or more.</b>
+      Your ${base.bottleneck.kind === "cpu" ? "CPU" : "GPU"} is the limit, and the parts that would fix it cost more than your budget.
+      Either raise the budget or use the <a class="c-gold" href="optimizer.html">Settings Optimizer</a> to get more from what you have.`;
+  } else {
+    const winner = [...viable].sort((a, b) => b.gain - a.gain)[0];
+    const value = viable[0];
+    hl.className = "pf-note green";
+    hl.innerHTML = `Baseline: <b>${base.fps} FPS</b> in ${game.name} at ${S.resolution} Ultra
+      (${base.bottleneck.kind === "balanced" ? "well balanced" : base.bottleneck.kind.toUpperCase() + "-limited"}).<br>
+      <b>Biggest gain:</b> ${winner.name} → ${winner.fps} FPS (+${winner.gain}, +${winner.pct.toFixed(0)}%) for $${fmt(winner.cost)}.<br>
+      <b>Best value:</b> ${value.name} → ${value.fps} FPS (+${value.gain}) for $${fmt(value.cost)} — ${value.perDollar.toFixed(1)} FPS per $100.`;
+  }
+
+  /* ---- table ---- */
+  document.getElementById("table").innerHTML = viable.length ? `
+    <thead><tr><th>Rank</th><th>Upgrade</th><th>Type</th><th>Cost</th><th>FPS</th><th>Gain</th><th>FPS / $100</th><th>Notes</th></tr></thead>
+    <tbody>${viable.slice(0, 12).map((o, i) => `
+      <tr${i === 0 ? ' class="best"' : ""}>
+        <td>${i + 1}</td>
+        <td><b>${o.name}</b></td>
+        <td><span class="pf-chip ${o.kind === "GPU" ? "cyan" : o.kind === "CPU" ? "violet" : "gold"}">${o.kind}</span></td>
+        <td class="pf-mono">$${fmt(o.cost)}</td>
+        <td class="pf-mono">${o.fps}</td>
+        <td class="pf-mono c-green">+${o.gain} (${o.pct.toFixed(0)}%)</td>
+        <td class="pf-mono">${o.perDollar.toFixed(1)}</td>
+        <td>${o.note}</td>
+      </tr>`).join("")}</tbody>`
+    : `<tbody><tr><td>No upgrade inside this budget clears the 2 FPS threshold.</td></tr></tbody>`;
+
+  /* ---- narrative ---- */
+  const sum = document.getElementById("summary");
+  if (!viable.length) { sum.innerHTML = ""; return; }
+  const value = viable[0];
+  const best = [...viable].sort((a, b) => b.gain - a.gain)[0];
+  sum.innerHTML = `
+    <b>Reading the result.</b> Your system is currently <b>${base.bottleneck.kind === "balanced" ? "balanced" : base.bottleneck.kind + "-limited"}</b>
+    in ${game.name} at ${S.resolution}. ${base.bottleneck.kind === "cpu"
+      ? `That is why swapping the GPU barely helps — the ${curCpu.name} cannot feed frames any faster.`
+      : base.bottleneck.kind === "gpu"
+      ? `That is why CPU swaps show almost no gain here — the ${curGpu.name} is the wall.`
+      : "Both halves are close, so either upgrade will pay off."}
+    <br><br>If you want the most frames, buy <b>${best.name}</b> ($${fmt(best.cost)}, +${best.gain} FPS).
+    If you want the most frames <i>per dollar</i>, buy <b>${value.name}</b> ($${fmt(value.cost)}, +${value.gain} FPS).
+    ${base.vram.state === "over" ? `<br><br><b>Also worth knowing:</b> at these settings the ${curGpu.name} is already spilling
+      ${base.vram.overflow.toFixed(1)} GB of VRAM into system memory. Any GPU with more memory than ${curGpu.vram} GB
+      will fix that on its own — often worth more than raw speed.` : ""}`;
+}
+
+["cpu", "gpu", "game", "resolution"].forEach(id => on(id, "change", () => { S[id] = val(id); run(); }));
+on("ramAmount", "change", () => { S.ramGb = num("ramAmount", 16); run(); });
+on("budget", "input", () => { S.budget = num("budget", 700); run(); });
+on("run", "click", () => { run(); toast("Upgrade paths simulated"); });
+
+run();
+</script>
+</body>
+</html>
