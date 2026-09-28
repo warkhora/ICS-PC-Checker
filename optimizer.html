@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings Optimizer — PCFORGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+
+<div class="pf-container">
+
+  <header class="pf-hero">
+    <div class="pf-eyebrow">● New tool</div>
+    <h1>Settings Optimizer</h1>
+    <p>Set a target frame rate and this tool searches every combination of preset, ray
+       tracing, upscaling and frame generation, then recommends the best-looking one that
+       still hits your target — without spilling VRAM.</p>
+  </header>
+
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">🎯</span> Your target</h2>
+    <div class="pf-grid pf-grid-3">
+      <div><label class="pf-label" for="cpu">CPU</label><select id="cpu"></select></div>
+      <div><label class="pf-label" for="gpu">GPU</label><select id="gpu"></select></div>
+      <div><label class="pf-label" for="game">Game</label><select id="game"></select></div>
+    </div>
+    <div class="pf-grid pf-grid-3" style="margin-top:14px;">
+      <div><label class="pf-label" for="resolution">Resolution</label><select id="resolution"></select></div>
+      <div><label class="pf-label" for="target">Target frame rate</label>
+        <select id="target">
+          <option value="60">60 FPS — smooth on a 60 Hz display</option>
+          <option value="90">90 FPS — comfortable</option>
+          <option value="120" selected>120 FPS — fills a 120/144 Hz display</option>
+          <option value="144">144 FPS — competitive</option>
+          <option value="240">240 FPS — esports</option>
+        </select>
+      </div>
+      <div><label class="pf-label" for="ramAmount">System RAM</label><select id="ramAmount"></select></div>
+    </div>
+    <button class="pf-btn" id="run">Find the best settings</button>
+  </section>
+
+  <section class="pf-card reveal" id="out">
+    <h2><span class="ico">🏆</span> Recommendation</h2>
+    <div id="best"></div>
+    <div class="pf-section-title">VRAM at the recommended settings</div>
+    <div id="vramGauge"></div>
+    <div class="pf-note" id="vramNote"></div>
+    <div class="pf-section-title">Next best alternatives</div>
+    <div class="pf-scroll"><table class="pf-table" id="alts"></table></div>
+    <div class="pf-summary" id="summary"></div>
+  </section>
+
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
+<script>
+const S = { cpu: "9800x3d", gpu: "rtx5070", game: "fh6", resolution: "1440p", target: 120, ramGb: 32 };
+
+fillSelect(document.getElementById("cpu"), CPUS.filter(c => !c.integrated), { groupKey: "brand", value: S.cpu });
+fillSelect(document.getElementById("gpu"), GPUS, { groupKey: "brand", value: S.gpu, labelFn: g => `${g.name} — ${g.vram} GB` });
+fillSelect(document.getElementById("game"), GAMES, { groupKey: "genre", value: S.game });
+fillEnumSelect(document.getElementById("resolution"), RESOLUTIONS, S.resolution);
+fillSelect(document.getElementById("ramAmount"), RAM_AMOUNTS.map(a => ({ id: a, name: a + " GB" })), { value: 32 });
+
+/* Higher is better-looking. Upscaling and frame generation cost image quality / responsiveness. */
+const Q_SCORE  = { ultra: 100, high: 82, medium: 62, low: 40 };
+const RT_SCORE = { off: 0, low: 12, medium: 20, high: 26, pt: 40 };
+const UP_PEN   = { off: 0, quality: 6, balanced: 11, performance: 18, ultra: 28 };
+const FG_PEN   = { off: 0, x2: 8, x3: 14, x4: 20 };
+
+function qualityScore(c) {
+  return Q_SCORE[c.quality] + RT_SCORE[c.rt] - UP_PEN[c.upscaler] - FG_PEN[c.fg];
+}
+
+function search() {
+  const gpu = gpuById(S.gpu), game = gameById(S.game);
+  const rtOk = gameSupportsRT(game) && isRT(gpu);
+  const ptOk = gameSupportsPT(game) && isRT(gpu);
+  const rtOptions = game.alwaysPT ? ["pt"]
+    : !rtOk ? ["off"]
+    : ["off", "low", "medium", "high"].concat(ptOk ? ["pt"] : []);
+
+  const combos = [];
+  for (const quality of ["ultra", "high", "medium", "low"]) {
+    for (const rt of rtOptions) {
+      for (const upscaler of ["off", "quality", "balanced", "performance"]) {
+        for (const fg of availableFgModes(gpu)) {
+          const r = estimate({ cpu: S.cpu, gpu: S.gpu, game: S.game, resolution: S.resolution,
+                               quality, rt, upscaler, fg, ramGb: S.ramGb, ramSpeed: "ddr5-6000" });
+          if (r.blocked) continue;
+          combos.push({ cfg: { quality, rt, upscaler, fg }, r, score: qualityScore({ quality, rt, upscaler, fg }) });
+        }
+      }
+    }
+  }
+
+  const target = S.target;
+  const hits = combos.filter(c => c.r.fps >= target && c.r.fps <= target * 4 && c.r.vram.state !== "over");
+  const nearMiss = combos.filter(c => c.r.fps >= target);      // hits, but VRAM spills
+  const pool = hits.length ? hits : nearMiss;
+
+  // Best-looking first; ties broken by higher frame rate.
+  pool.sort((a, b) => (b.score - a.score) || (b.r.fps - a.r.fps));
+  return { best: pool[0] || null, pool, hits, combos, target };
+}
+
+function label(cfg) {
+  return `${QUALITY[cfg.quality].label} · RT ${RT_LEVELS[cfg.rt].label} · ` +
+         `${cfg.upscaler === "off" ? "Native" : upscalerName(gpuById(S.gpu)) + " " + cfg.upscaler} · ` +
+         `FG ${FG_MODES[cfg.fg].label}`;
+}
+
+function run() {
+  const { best, pool, hits, target } = search();
+  const out = document.getElementById("best");
+
+  if (!best) {
+    out.innerHTML = `<div class="pf-note red"><b>No combination reaches ${target} FPS in this game on this hardware.</b>
+      Lower the target, drop the resolution, or look at the <a class="c-gold" href="upgrade.html">Upgrade Advisor</a>.</div>`;
+    document.getElementById("alts").innerHTML = "";
+    document.getElementById("summary").innerHTML = "";
+    document.getElementById("vramGauge").innerHTML = "";
+    document.getElementById("vramNote").innerHTML = "";
+    return;
+  }
+
+  const r = best.r;
+  const tone = fpsClass(r.fps);
+  out.innerHTML = `
+    <div class="pf-hero-fps">
+      <div class="num ${tone.cls} ${tone.glow}">${r.fps}</div>
+      <div class="unit">frames per second at the recommended settings</div>
+      <div class="pf-verdict ${tone.cls}" style="margin-top:14px;">${label(best.cfg)}</div>
+    </div>
+    ${hits.length ? "" : `<div class="pf-note red" style="margin-top:16px;"><b>Heads up:</b> every configuration that reaches
+      ${target} FPS exceeds the ${r.gpu.vram} GB VRAM budget of the ${r.gpu.name}. The recommendation below is the best
+      compromise — expect occasional stutter.</div>`}`;
+
+  renderVramGauge(document.getElementById("vramGauge"), r.vram, r.gpu);
+  const vn = document.getElementById("vramNote");
+  vn.className = "pf-note " + (r.vram.state === "over" ? "red" : r.vram.state === "tight" ? "" : "green");
+  vn.innerHTML = `Needs ≈<b>${r.vram.required.toFixed(1)} GB</b> of the ${r.gpu.vram} GB on the ${r.gpu.name}` +
+    (r.vram.state === "over"
+      ? ` — overflowing by ${r.vram.overflow.toFixed(1)} GB and losing ≈${Math.round((1 - r.vram.penalty) * 100)}% of frames.`
+      : ` — ${Math.round(r.vram.fill * 100)}% used, no spill.`);
+
+  /* alternatives */
+  const rows = pool.slice(1, 9).map((c, i) => `
+    <tr${i === 0 ? ' class="best"' : ""}>
+      <td><b>${QUALITY[c.cfg.quality].label}</b></td>
+      <td>${RT_LEVELS[c.cfg.rt].label}</td>
+      <td>${c.cfg.upscaler === "off" ? "Native" : upscalerName(gpuById(S.gpu)) + " " + c.cfg.upscaler}</td>
+      <td>${FG_MODES[c.cfg.fg].label}</td>
+      <td class="pf-mono">${c.r.fps}</td>
+      <td class="pf-mono">${c.r.vram.required.toFixed(1)} / ${r.gpu.vram} GB${c.r.vram.state === "over" ? ' <span class="c-red">spill</span>' : ""}</td>
+      <td class="pf-mono">${c.score}</td>
+    </tr>`).join("");
+  document.getElementById("alts").innerHTML = `
+    <thead><tr><th>Preset</th><th>Ray tracing</th><th>Upscaling</th><th>Frame gen</th><th>FPS</th><th>VRAM</th><th>Image quality</th></tr></thead>
+    <tbody>${rows}</tbody>`;
+
+  /* "Maximum headroom" should mean useful headroom, not a 600 FPS slideshow that
+     nobody can display. Prefer the fastest config that stays within 2× the target. */
+  const byFps = [...pool].sort((a, b) => b.r.fps - a.r.fps);
+  const cheapest = byFps.find(c => c.r.fps <= target * 2) || byFps[0];
+  document.getElementById("summary").innerHTML = `
+    <b>Why this one?</b> Of the ${pool.length} configurations that clear ${target} FPS, this scores highest for image
+    quality — it keeps <b>${QUALITY[best.cfg.quality].label}</b> textures and
+    <b>${RT_LEVELS[best.cfg.rt].label}</b> ray tracing, using
+    ${best.cfg.upscaler === "off" ? "no upscaling at all" : upscalerName(gpuById(S.gpu)) + " " + best.cfg.upscaler}
+    and ${best.cfg.fg === "off" ? "no frame generation" : FG_MODES[best.cfg.fg].label.toLowerCase()}.
+    ${best.cfg.fg !== "off" ? `Frame generation adds about ${FG_MODES[best.cfg.fg].latency} ms of latency — fine for a racing or story game, not ideal for competitive shooters.` : ""}
+    ${cheapest !== best ? `<br><br>If you want maximum headroom instead, <b>${label(cheapest.cfg)}</b> gives you ${cheapest.r.fps} FPS.` : ""}
+    ${r.cap ? `<br><br>${gameById(S.game).name} is engine-capped at ${r.cap} FPS, so anything above that is wasted.` : ""}`;
+}
+
+["cpu", "gpu", "game", "resolution"].forEach(id =>
+  on(id, "change", () => { S[id] = val(id); run(); }));
+on("target", "change", () => { S.target = num("target", 120); run(); });
+on("ramAmount", "change", () => { S.ramGb = num("ramAmount", 32); run(); });
+on("run", "click", () => { run(); toast("Search complete"); });
+
+run();
+</script>
+</body>
+</html>

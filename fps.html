@@ -2,901 +2,332 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ICS Hybrid FPS Estimator v3.2</title>
-
-<style>
-  body {
-    margin: 0;
-    padding: 40px;
-    background: linear-gradient(135deg, #050505, #000000);
-    color: #e6e6e6;
-    font-family: "Segoe UI", system-ui, sans-serif;
-  }
-
-  .ics-container {
-    max-width: 1100px;
-    margin: auto;
-    backdrop-filter: blur(18px);
-  }
-
-  .ics-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .ics-logo {
-    font-size: 32px;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    color: #ffd700;
-    font-weight: 600;
-  }
-
-  .ics-subtitle {
-    color: #bbb;
-    margin-top: 8px;
-    font-size: 15px;
-  }
-
-  .ics-frame {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 25px;
-    margin-bottom: 30px;
-    border-radius: 18px;
-    transition: 0.3s ease;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.08);
-  }
-
-  .ics-frame:hover {
-    border-color: rgba(255, 215, 0, 0.6);
-    box-shadow: 0 0 35px rgba(255, 215, 0, 0.25);
-    transform: translateY(-3px);
-  }
-
-  select, button {
-    width: 100%;
-    background: rgba(20, 20, 20, 0.85);
-    color: #eee;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    padding: 12px;
-    border-radius: 10px;
-    margin: 10px 0;
-    transition: 0.2s;
-    font-size: 15px;
-    backdrop-filter: blur(12px);
-  }
-
-  select:hover, button:hover {
-    border-color: #ffd700;
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
-  }
-
-  select option {
-    background: #111;
-    color: #eee;
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .row-3 {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .result-box {
-    margin-top: 20px;
-    padding: 25px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    text-align: center;
-    font-size: 32px;
-    font-weight: 700;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(14px);
-    transition: 0.3s ease;
-  }
-
-  .fps-red    { color: #ff4d4d; text-shadow: 0 0 12px rgba(255, 0, 0, 0.6); }
-  .fps-orange { color: #ffae42; text-shadow: 0 0 12px rgba(255, 165, 0, 0.6); }
-  .fps-white  { color: #ffffff; text-shadow: 0 0 12px rgba(255, 255, 255, 0.6); }
-  .fps-green  { color: #7CFC00; text-shadow: 0 0 12px rgba(124, 252, 0, 0.6); }
-  .fps-blue   { color: #4dc3ff; text-shadow: 0 0 12px rgba(0, 170, 255, 0.6); }
-
-  .experience {
-    margin-top: 10px;
-    text-align: center;
-    font-size: 15px;
-    color: #ccc;
-  }
-
-  .tips-frame {
-    margin-top: 25px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 14px;
-    backdrop-filter: blur(12px);
-  }
-
-  .tips-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #ffd700;
-    margin-bottom: 10px;
-  }
-
-  .tips-list {
-    font-size: 14px;
-    color: #ddd;
-    line-height: 1.6;
-  }
-
-  .tag {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    margin-right: 6px;
-    border: 1px solid rgba(255,255,255,0.2);
-  }
-
-  .tag-nvidia { color: #7dd3fc; border-color: #0ea5e9; }
-  .tag-amd { color: #f97373; border-color: #ef4444; }
-  .tag-ics { color: #facc15; border-color: #eab308; }
-
-  .ics-nav {
-    width: 100%;
-    background: rgba(0,0,0,0.65);
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    padding: 16px 24px;
-    display: flex;
-    gap: 30px;
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    backdrop-filter: blur(12px);
-    margin: -40px -40px 40px -40px;
-  }
-
-  .ics-nav a {
-    color: #ffd700;
-    text-decoration: none;
-    font-size: 16px;
-    letter-spacing: 1px;
-    transition: 0.2s;
-    padding-bottom: 4px;
-  }
-
-  .ics-nav a:hover {
-    color: white;
-    text-shadow: 0 0 10px #ffd700;
-  }
-
-  /* ▼ MORE MENU DROPDOWN */
-.nav-more {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.nav-more-btn {
-  color: #ffd700;
-  cursor: pointer;
-  font-size: 16px;
-  letter-spacing: 1px;
-  padding-bottom: 4px;
-  transition: 0.25s ease;
-}
-
-.nav-more-btn:hover {
-  color: white;
-  text-shadow: 0 0 10px #ffd700;
-}
-
-.nav-more-menu {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 14px;
-  padding: 10px;
-  width: 220px;
-  display: none;
-  flex-direction: column;
-  box-shadow: 0 0 25px rgba(255,215,0,0.15);
-  z-index: 9999;
-}
-
-.nav-more-menu a {
-  color: #ffd700;
-  text-decoration: none;
-  padding: 8px 10px;
-  border-radius: 10px;
-  transition: 0.25s ease;
-  display: block;
-  font-size: 14px;
-}
-
-.nav-more-menu a:hover {
-  background: rgba(255,255,255,0.08);
-  color: white;
-  text-shadow: 0 0 10px #ffd700;
-}
-
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FPS Estimator — PCFORGE</title>
+<link rel="stylesheet" href="assets/theme.css">
 </head>
 <body>
 
-<div class="ics-nav">
-  <a href="index.html" class="nav-link" data-page="index">CPU/GPU Comparison</a>
-  <a href="fps.html" class="nav-link" data-page="fps">FPS Estimator</a>
-  <a href="canyourunit.html" class="nav-link" data-page="canyourunit">Can You Run It?</a>
-  <a href="build.html" class="nav-link" data-page="build">Build Your PC</a>
-  <a href="pclifetime.html" class="nav-link" data-page="pclifetime">PC Lifespan</a>
-  <a href="thermals.html" class="nav-link" data-page="thermals">Thermal & Cooling</a>
-  <a href="consumption.html" class="nav-link" data-page="consumption">Power Consumption</a>
-  <a href="storage.html" class="nav-link" data-page="storage">Storage & Load Times</a>
+<div class="pf-container">
 
-  <!-- ▼ NEW DROPDOWN BUTTON (INSIDE NAV!) -->
-  <div class="nav-more">
-    <span class="nav-more-btn">More ▼</span>
-    <div class="nav-more-menu">
-      <a href="bottleneck.html">Bottleneck Analyzer</a>
-      <a href="future1.html">Future Tool 1</a>
-      <a href="future2.html">Future Tool 2</a>
-      <a href="future3.html">Future Tool 3</a>
+  <header class="pf-hero">
+    <div class="pf-eyebrow">● Live frame-rate model</div>
+    <h1>FPS Estimator</h1>
+    <p>Pick your hardware and a game. The model combines a GPU ceiling, a CPU ceiling,
+       ray-tracing cost, upscaling, frame generation — and a real VRAM budget that
+       punishes you when the card runs out of memory.</p>
+  </header>
+
+  <!-- ============================== HARDWARE ============================== -->
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">🖥</span> Your rig</h2>
+    <p class="pf-lede">Real components only — every entry exists and can be bought.</p>
+    <div class="pf-grid pf-grid-2">
+      <div><label class="pf-label" for="cpu">CPU</label><select id="cpu"></select></div>
+      <div><label class="pf-label" for="gpu">GPU</label><select id="gpu"></select></div>
     </div>
-  </div>
+    <div class="pf-grid pf-grid-2" style="margin-top:14px;">
+      <div><label class="pf-label" for="ramAmount">System RAM</label><select id="ramAmount"></select></div>
+      <div><label class="pf-label" for="ramSpeed">RAM speed</label><select id="ramSpeed"></select></div>
+    </div>
+    <div class="pf-note cyan" id="gpuSummary"></div>
+  </section>
+
+  <!-- ================================ GAME ================================ -->
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">🎮</span> Game &amp; display</h2>
+    <div class="pf-grid pf-grid-3">
+      <div><label class="pf-label" for="game">Game</label><select id="game"></select></div>
+      <div><label class="pf-label" for="resolution">Resolution</label><select id="resolution"></select></div>
+      <div><label class="pf-label" for="quality">Graphics preset</label><select id="quality"></select></div>
+    </div>
+    <div class="pf-note" id="gameSummary"></div>
+  </section>
+
+  <!-- ============================ RAY TRACING ============================= -->
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">💡</span> Ray tracing &amp; ray reconstruction</h2>
+    <p class="pf-lede"><b>High</b> is the top conventional tier. <b>Path Tracing</b> sits above it and
+       is only offered for titles that actually ship it.</p>
+    <div class="pf-grid pf-grid-2">
+      <div><label class="pf-label" for="rt">Ray tracing</label><select id="rt"></select></div>
+      <div><label class="pf-label" for="rr">Ray reconstruction</label>
+        <select id="rr"><option value="off">Off</option><option value="on">On (denoise + sharpen)</option></select>
+      </div>
+    </div>
+    <div class="pf-note" id="rtSummary"></div>
+  </section>
+
+  <!-- ============================== UPSCALING ============================= -->
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">🔍</span> Upscaling &amp; frame generation</h2>
+    <div class="pf-grid pf-grid-2">
+      <div><label class="pf-label" for="upscaler" id="upscalerLabel">Upscaling</label><select id="upscaler"></select></div>
+      <div><label class="pf-label" for="fg">Frame generation</label><select id="fg"></select></div>
+    </div>
+    <div class="pf-note" id="upSummary"></div>
+  </section>
+
+  <!-- =============================== RESULT =============================== -->
+  <section class="pf-card reveal">
+    <h2><span class="ico">📈</span> Result</h2>
+    <button class="pf-btn" id="run">Estimate FPS</button>
+    <div id="blocked" class="pf-note red hidden" style="margin-top:16px;"></div>
+
+    <div id="result" class="hidden" style="margin-top:22px;">
+      <div class="pf-hero-fps">
+        <div class="num" id="fpsNum">—</div>
+        <div class="unit">estimated frames per second</div>
+        <div class="pf-verdict" id="verdict"></div>
+        <div class="pf-stat-note" id="expNote" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="pf-section-title">VRAM budget</div>
+      <div id="vramGauge"></div>
+      <div class="pf-note" id="vramNote"></div>
+
+      <div class="pf-section-title">Where the frames come from</div>
+      <div class="pf-grid pf-grid-4" id="stats"></div>
+
+      <div class="pf-section-title">Effect of each ray-tracing tier</div>
+      <div id="rtChart"></div>
+
+      <div class="pf-section-title">Recommendations</div>
+      <div class="pf-note" id="tips"></div>
+    </div>
+  </section>
+
 </div>
 
-  <script>
-  const moreBtn = document.querySelector(".nav-more-btn");
-  const moreMenu = document.querySelector(".nav-more-menu");
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
+<script>
+const state = { cpu: "9800x3d", gpu: "rtx5070", game: "fh6", resolution: "1440p",
+                quality: "ultra", rt: "high", rr: "off", upscaler: "off", fg: "off",
+                ramGb: 32, ramSpeed: "ddr5-6000" };
 
-  moreBtn.addEventListener("click", () => {
-    moreMenu.style.display = moreMenu.style.display === "flex" ? "none" : "flex";
+/* --------------------------------------------------------------- selectors */
+fillSelect(document.getElementById("cpu"), CPUS.filter(c => !c.integrated), { groupKey: "brand", value: state.cpu });
+fillSelect(document.getElementById("gpu"), GPUS, { groupKey: "brand", value: state.gpu,
+  labelFn: g => `${g.name} — ${g.vram} GB ${g.vramType}` });
+fillSelect(document.getElementById("game"), GAMES, { groupKey: "genre", value: state.game });
+fillSelect(document.getElementById("ramAmount"), RAM_AMOUNTS.map(a => ({ id: a, name: a + " GB" })), { value: 32 });
+fillEnumSelect(document.getElementById("ramSpeed"), RAM_SPEEDS, state.ramSpeed);
+fillEnumSelect(document.getElementById("resolution"), RESOLUTIONS, state.resolution);
+fillEnumSelect(document.getElementById("quality"), QUALITY, state.quality);
+
+/* --------------------------------------------------------- dynamic panels */
+function refreshDynamicPanels() {
+  const gpu = gpuById(state.gpu), game = gameById(state.game);
+
+  /* GPU summary */
+  document.getElementById("gpuSummary").innerHTML =
+    `<b>${gpu.name}</b> · ${gpu.vram} GB ${gpu.vramType} (${gpu.bus}, ${fmt(gpu.bw)} GB/s) · ${gpu.tdp} W · ` +
+    `${gpu.arch} · <b>${upscalerName(gpu)}</b>` +
+    (gpu.fg ? ` · frame generation up to ${gpu.fg}×` : " · no frame generation") +
+    (gpu.noRT ? " · <b>no RT hardware</b>" : "");
+
+  /* Game summary */
+  document.getElementById("gameSummary").innerHTML =
+    `<b>${game.name}</b> (${game.year}, ${game.engine}) · ${game.sizeGB} GB install · ` +
+    `RAM ${game.minRam}–${game.recRam} GB · ${game.notes}` +
+    (game.cap ? ` · <b>engine-capped at ${game.cap} FPS</b>` : "");
+
+  /* Ray tracing options — rebuilt per game so unsupported tiers are impossible */
+  const rtSel = document.getElementById("rt");
+  const rtOk = gameSupportsRT(game) && isRT(gpu);
+  const ptOk = gameSupportsPT(game) && isRT(gpu);
+  rtSel.innerHTML = "";
+  Object.entries(RT_LEVELS).forEach(([k, v]) => {
+    if (k === "pt" && !ptOk) return;
+    if (k !== "off" && !rtOk) return;
+    if (game.alwaysPT && k !== "pt") return;
+    const o = document.createElement("option");
+    o.value = k;
+    o.textContent = k === "pt" ? `${v.label} — ${game.pt.name}` : v.label;
+    rtSel.appendChild(o);
   });
-
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".nav-more")) {
-      moreMenu.style.display = "none";
-    }
-  });
-</script>
-
-  <style>
-  .ics-nav a.active {
-    color: white;
-    border-bottom: 2px solid #ffd700;
-    text-shadow: 0 0 12px #ffd700;
+  if (!rtOk) {
+    const o = document.createElement("option");
+    o.value = "off";
+    o.textContent = gameSupportsRT(game) ? "Off (no RT hardware on this GPU)" : "Off (game has no ray tracing)";
+    rtSel.appendChild(o);
   }
-</style>
+  if (game.alwaysPT && ptOk) state.rt = "pt";
+  else if (![...rtSel.options].some(o => o.value === state.rt)) state.rt = rtSel.options[0].value;
+  rtSel.value = state.rt;
 
-<script>
-  const current = window.location.pathname.split("/").pop().toLowerCase();
-  document.querySelectorAll(".nav-link").forEach(link => {
-    if (current.includes(link.getAttribute("data-page"))) {
-      link.classList.add("active");
-    }
+  const rrSel = document.getElementById("rr");
+  const rrOk = gpu.brand === "NVIDIA" || gpu.brand === "Intel";
+  [...rrSel.options].forEach(o => { o.disabled = (o.value === "on" && !rrOk); });
+  if (!rrOk && state.rr === "on") { state.rr = "off"; rrSel.value = "off"; }
+
+  document.getElementById("rtSummary").innerHTML = !rtOk
+    ? (gameSupportsRT(game)
+        ? `${game.name} supports ray tracing, but the <b>${gpu.name}</b> has no RT hardware — RT is unavailable.`
+        : `<b>${game.name}</b> does not implement ray tracing. This control has no effect.`)
+    : (ptOk
+        ? `Path tracing is available in ${game.name} (${game.pt.name}). Expect a large frame-rate drop and a much bigger VRAM footprint.`
+        : `<b>${game.name}</b> tops out at conventional ray tracing — <b>High</b> is the maximum tier. Path tracing is not offered by this title.`);
+
+  /* Upscaler options */
+  const upSel = document.getElementById("upscaler");
+  const modes = ["off", "quality", "balanced", "performance", "ultra"];
+  upSel.innerHTML = "";
+  modes.forEach(m => {
+    const o = document.createElement("option");
+    o.value = m;
+    o.textContent = m === "off" ? "Off (native resolution)"
+      : `${m[0].toUpperCase() + m.slice(1)} · ×${upscalerMultiplier(gpu, m).toFixed(2)}`;
+    upSel.appendChild(o);
   });
-</script>
+  if (!modes.includes(state.upscaler)) state.upscaler = "off";
+  upSel.value = state.upscaler;
+  document.getElementById("upscalerLabel").textContent = `${upscalerName(gpu)} / upscaling`;
 
-<div class="ics-container">
+  /* Frame generation options */
+  const fgSel = document.getElementById("fg");
+  fgSel.innerHTML = "";
+  availableFgModes(gpu).forEach(m => {
+    const o = document.createElement("option");
+    o.value = m;
+    o.textContent = FG_MODES[m].label + (m === "off" ? "" : ` · +${FG_MODES[m].latency} ms latency`);
+    fgSel.appendChild(o);
+  });
+  if (!availableFgModes(gpu).includes(state.fg)) state.fg = "off";
+  fgSel.value = state.fg;
 
-  <div class="ics-header">
-    <div class="ics-logo">ICS REGENT</div>
-    <div class="ics-subtitle">Hybrid FPS Estimator v3.2 — RTX 40/50 • RX 9000 • ICS VX</div>
-  </div>
+  document.getElementById("upSummary").innerHTML = gpu.upscaler === "none"
+    ? "This GPU has no supported upscaler in the database."
+    : `${upscalerName(gpu)} renders at a lower resolution and reconstructs the image. ` +
+      (gpu.fg >= 4
+        ? `The ${gpu.arch} generation also supports <b>Multi Frame Generation</b> (up to 4×), which multiplies the frame count but adds input latency — great for single-player, poor for competitive play.`
+        : gpu.fg ? "Frame generation is available on this card." : "No frame generation on this generation.");
 
-  <!-- Base configuration -->
-  <div class="ics-frame">
-    <h2>Base Configuration</h2>
-    <p>Select CPU, GPU, game, resolution and graphics quality.</p>
-
-    <div class="row">
-      <div>
-        <label>CPU</label>
-        <select id="cpu"></select>
-      </div>
-      <div>
-        <label>GPU</label>
-        <select id="gpu"></select>
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>Game</label>
-        <select id="game" onchange="updateRamOptions()"></select>
-      </div>
-      <div>
-        <label>Resolution</label>
-        <select id="resolution"></select>
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>Graphics quality</label>
-        <select id="gfx">
-          <option value="low">Low</option>
-          <option value="medium" selected>Medium</option>
-          <option value="high">High</option>
-          <option value="ultra">Ultra</option>
-        </select>
-      </div>
-      <div>
-        <p class="note">
-          <span class="tag tag-nvidia">NVIDIA RTX 40 / 50</span>
-          <span class="tag tag-amd">AMD RX 9000</span>
-          <span class="tag tag-ics">ICS Regent VX</span>
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- RAM -->
-  <div class="ics-frame">
-    <h2>Memory Configuration</h2>
-    <div class="row">
-      <div>
-        <label>RAM amount</label>
-        <select id="ramAmount"></select>
-      </div>
-      <div>
-        <label>RAM speed / type</label>
-        <select id="ramSpeed">
-          <option value="ddr4-2133">DDR4-2133</option>
-          <option value="ddr4-2400">DDR4-2400</option>
-          <option value="ddr4-2666">DDR4-2666</option>
-          <option value="ddr4-3000">DDR4-3000</option>
-          <option value="ddr4-3200" selected>DDR4-3200</option>
-          <option value="ddr4-3600">DDR4-3600</option>
-          <option value="ddr5-4800">DDR5-4800</option>
-          <option value="ddr5-5200">DDR5-5200</option>
-          <option value="ddr5-5600">DDR5-5600</option>
-          <option value="ddr5-6000">DDR5-6000</option>
-          <option value="ddr5-6400">DDR5-6400</option>
-          <option value="ddr5-7200">DDR5-7200</option>
-          <option value="ddr5-8000">DDR5-8000</option>
-          <option value="ddr5-8800">DDR5-8800</option>
-          <option value="ddr5-9600">DDR5-9600</option>
-          <option value="lpddr5">LPDDR5</option>
-          <option value="lpddr5x">LPDDR5X</option>
-          <option value="lpddr6">LPDDR6</option>
-          <option value="lpddr6x">LPDDR6X</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- RT / RR -->
-  <div class="ics-frame">
-    <h2>Ray Tracing & Ray Reconstruction</h2>
-
-    <div class="row">
-      <div>
-        <label>Ray Tracing</label>
-        <select id="rt">
-          <option value="off">Off</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="ultra">Ultra</option>
-        </select>
-      </div>
-      <div>
-        <label>Ray Reconstruction</label>
-        <select id="rr">
-          <option value="off">Off</option>
-          <option value="on">On</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- Upscaling -->
-  <div class="ics-frame">
-    <h2>Upscaling & Frame Generation</h2>
-
-    <div class="row-3">
-      <div>
-        <label>DLSS / FSR</label>
-        <select id="dlss">
-          <option value="off">Off</option>
-          <option value="quality">Quality</option>
-          <option value="balanced">Balanced</option>
-          <option value="performance">Performance</option>
-          <option value="ultra">Ultra Performance</option>
-        </select>
-      </div>
-      <div>
-        <label>DCC (ICS Only)</label>
-        <select id="dcc">
-          <option value="off">Off</option>
-          <option value="quality">Quality</option>
-          <option value="balanced">Balanced</option>
-          <option value="performance">Performance</option>
-          <option value="ultra">Ultra Performance</option>
-        </select>
-      </div>
-      <div>
-        <label>Frame Generation</label>
-        <select id="fg">
-          <option value="off">Off</option>
-          <option value="on">On</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- Estimate -->
-  <div class="ics-frame">
-    <h2>Estimate FPS</h2>
-    <button onclick="estimateFPS()">Estimate FPS</button>
-
-    <div id="result" class="result-box" style="display:none;"></div>
-    <div id="experience" class="experience"></div>
-
-    <div id="tips" class="tips-frame" style="display:none;">
-      <div class="tips-title">⚠️ ICS Performance Tips</div>
-      <div id="tips-list" class="tips-list"></div>
-    </div>
-  </div>
-
-</div>
-
-<script>
-/* CPU SCORES – v3.2 */
-const cpuScores = {
-  "Regent GX 9-9995RX4D": 26000,
-  "Regent GX 7-9750RX3": 21000,
-
-  "AMD Ryzen 7 9850X3D": 23300,
-  "AMD Ryzen 7 9800X3D": 23000,
-  "AMD Ryzen 9 9950X3D": 22000,
-  "AMD Ryzen 9 9900X3D": 21000,
-
-  "AMD Ryzen 5 7500F": 7600,
-
-  "AMD Ryzen Threadripper PRO 9955WX": 14700,
-  "AMD Ryzen Threadripper PRO 9995WX": 23500,
-
-  "Intel Core i9-14900K": 18500,
-  "Intel Core Ultra 9 285K": 17000,
-  "Intel Core Ultra 7 270K": 14000,
-  "Intel Core i5-12400F": 9000
-};
-
-/* GPU SCORES + CLASS (+8% raw boost applied later) */
-const gpuData = {
-  "Regent VX 6690": { score: 36000, vendor: "ics", gen: "ics", cls: "ultra" },
-  "Regent VX 6670": { score: 30000, vendor: "ics", gen: "ics", cls: "strong" },
-
-  "NVIDIA RTX 5090": { score: 36000, vendor: "nvidia", gen: "rtx50", cls: "ultra" },
-  "NVIDIA RTX 5080": { score: 32000, vendor: "nvidia", gen: "rtx50", cls: "strong" },
-  "NVIDIA RTX 5070 Ti": { score: 28000, vendor: "nvidia", gen: "rtx50", cls: "strong" },
-  "NVIDIA RTX 5070": { score: 25000, vendor: "nvidia", gen: "rtx50", cls: "medium" },
-  "NVIDIA RTX 5060 Ti": { score: 21000, vendor: "nvidia", gen: "rtx50", cls: "medium" },
-  "NVIDIA RTX 5060": { score: 18000, vendor: "nvidia", gen: "rtx50", cls: "medium" },
-  "NVIDIA RTX 5050": { score: 15000, vendor: "nvidia", gen: "rtx50", cls: "weak" },
-
-  "NVIDIA RTX 4090": { score: 32000, vendor: "nvidia", gen: "rtx40", cls: "strong" },
-  "NVIDIA RTX 4080 Super": { score: 27000, vendor: "nvidia", gen: "rtx40", cls: "strong" },
-  "NVIDIA RTX 4070 Ti Super": { score: 22000, vendor: "nvidia", gen: "rtx40", cls: "medium" },
-  "NVIDIA RTX 4070": { score: 18000, vendor: "nvidia", gen: "rtx40", cls: "medium" },
-
-  "AMD RX 9070 XT": { score: 25000, vendor: "amd", gen: "amd9", cls: "medium" },
-  "AMD RX 9070": { score: 22000, vendor: "amd", gen: "amd9", cls: "medium" },
-  "AMD RX 9060 XT": { score: 19000, vendor: "amd", gen: "amd9", cls: "medium" },
-  "AMD RX 9060": { score: 16000, vendor: "amd", gen: "amd9", cls: "weak" }
-};
-
-/* GAME MULTIPLIERS + DIFFICULTY + SIZE + MIN RAM (GB) */
-const gameMultipliers = {
-  "GTA V": { mul: 4.2, difficulty: "light", size: "small", minRam: 4 },
-  "Valorant": { mul: 4.8, difficulty: "light", size: "small", minRam: 4 },
-  "CS2": { mul: 4.5, difficulty: "light", size: "small", minRam: 8 },
-  "Overwatch 2": { mul: 2.8, difficulty: "light", size: "small", minRam: 6 },
-
-  "Fortnite": { mul: 2.2, difficulty: "medium", size: "medium", minRam: 8 },
-  "Apex Legends": { mul: 1.6, difficulty: "medium", size: "medium", minRam: 6 },
-  "Rust": { mul: 1.3, difficulty: "medium", size: "medium", minRam: 10 },
-  "Forza Horizon 5": { mul: 2.4, difficulty: "medium", size: "medium", minRam: 8 },
-  "Forza Horizon 6": { mul: 2.1, difficulty: "medium", size: "large", minRam: 16 },
-
-  "Cyberpunk 2077": { mul: 0.9, difficulty: "heavy", size: "large", minRam: 8 },
-  "GTA VI": { mul: 0.7, difficulty: "heavy", size: "large", minRam: 16 },
-  "Minecraft RTX": { mul: 0.5, difficulty: "heavy", size: "medium", minRam: 8 },
-  "ARK Survival Ascended": { mul: 0.6, difficulty: "heavy", size: "large", minRam: 8 },
-  "Microsoft Flight Simulator 2024": { mul: 0.45, difficulty: "heavy", size: "large", minRam: 16 }
-};
-
-/* RESOLUTION MULTIPLIERS */
-const resolutionMultipliers = {
-  "1080p": 1.0,
-  "1440p": 0.72,
-  "4K": 0.42
-};
-
-/* GRAPHICS QUALITY MULTIPLIERS */
-const qualityMultipliers = {
-  low: 1.6,
-  medium: 1.0,
-  high: 0.75,
-  ultra: 0.55
-};
-
-/* DLSS 4.5 (RTX 50) */
-const dlss50 = {
-  off:1.0,
-  quality:1.5,
-  balanced:1.7,
-  performance:2.6,
-  ultra:4.5
-};
-
-/* DLSS 3.0 (RTX 40) */
-const dlss40 = {
-  off:1.0,
-  quality:1.35,
-  balanced:1.55,
-  performance:2.4,
-  ultra:3.8
-};
-
-/* FSR (RX 9000) */
-const fsr = {
-  off:1.0,
-  quality:1.4,
-  balanced:1.7,
-  performance:2.2,
-  ultra:3.0
-};
-
-/* DCC (ICS) */
-const dccMultipliers = {
-  off:1.0,
-  quality:1.6,
-  balanced:2.1,
-  performance:2.8,
-  ultra:4.2
-};
-
-/* FRAME GENERATION MULTIPLIERS */
-const fgMultipliers = {
-  rtx50: 2.8,
-  rtx40: 1.7,
-  ics:   3.0,
-  amd9:  1.0
-};
-
-/* GPU STRENGTH SCALING (lette spill) */
-const gpuStrengthScaling = {
-  weak:   1.0,
-  medium: 1.1,
-  strong: 1.25,
-  ultra:  1.4
-};
-
-/* RAM AMOUNT OPTIONS (GB) */
-const ramAmounts = [4, 8, 16, 32, 64, 128];
-
-/* RAM SPEED MULTIPLIERS */
-const ramSpeedMultipliers = {
-  "ddr4-2133": 0.92,
-  "ddr4-2400": 0.94,
-  "ddr4-2666": 0.96,
-  "ddr4-3000": 0.98,
-  "ddr4-3200": 1.00,
-  "ddr4-3600": 1.03,
-
-  "ddr5-4800": 1.05,
-  "ddr5-5200": 1.07,
-  "ddr5-5600": 1.09,
-  "ddr5-6000": 1.10,
-  "ddr5-6400": 1.12,
-  "ddr5-7200": 1.13,
-  "ddr5-8000": 1.15,
-  "ddr5-8800": 1.16,
-  "ddr5-9600": 1.17,
-
-  "lpddr5": 1.05,
-  "lpddr5x": 1.08,
-  "lpddr6": 1.12,
-  "lpddr6x": 1.20
-};
-
-/* Populate selectors */
-function loadSelectors() {
-  const cpuSel  = document.getElementById("cpu");
-  const gpuSel  = document.getElementById("gpu");
-  const gameSel = document.getElementById("game");
-  const resSel  = document.getElementById("resolution");
-  const ramSel  = document.getElementById("ramAmount");
-
-  Object.keys(cpuScores).forEach(c => cpuSel.innerHTML  += `<option>${c}</option>`);
-  Object.keys(gpuData).forEach(g   => gpuSel.innerHTML  += `<option>${g}</option>`);
-  Object.keys(gameMultipliers).forEach(g => gameSel.innerHTML += `<option>${g}</option>`);
-  Object.keys(resolutionMultipliers).forEach(r => resSel.innerHTML += `<option>${r}</option>`);
-
-  ramAmounts.forEach(r => ramSel.innerHTML += `<option value="${r}">${r} GB</option>`);
-
-  cpuSel.value  = "AMD Ryzen 7 9800X3D";
-  gpuSel.value  = "NVIDIA RTX 5080";
-  gameSel.value = "GTA V";
-  resSel.value  = "1080p";
-  document.getElementById("ramAmount").value = 16;
-
-  updateRamOptions();
-}
-loadSelectors();
-
-/* Update RAM options based on game min RAM */
-function updateRamOptions() {
-  const gameName = document.getElementById("game").value;
-  const game = gameMultipliers[gameName];
-  const minRam = game ? game.minRam : 4;
-
+  /* RAM floor per game */
   const ramSel = document.getElementById("ramAmount");
-  const current = parseInt(ramSel.value) || 16;
-
-  ramSel.innerHTML = "";
-  ramAmounts.forEach(r => {
-    if (r >= minRam) {
-      ramSel.innerHTML += `<option value="${r}">${r} GB</option>`;
-    }
+  [...ramSel.options].forEach(o => {
+    const gb = parseInt(o.value);
+    o.disabled = gb < game.minRam;
+    o.textContent = gb + " GB" + (gb < game.minRam ? " — below minimum" : gb < game.recRam ? " — below recommended" : "");
   });
+  if (state.ramGb < game.minRam) { state.ramGb = game.recRam; ramSel.value = game.recRam; }
+}
 
-  // prøv å beholde tidligere valg hvis mulig
-  const options = Array.from(ramSel.options).map(o => parseInt(o.value));
-  if (options.includes(current)) {
-    ramSel.value = current;
+/* ------------------------------------------------------------------ render */
+function render() {
+  refreshDynamicPanels();
+
+  const cfg = { cpu: state.cpu, gpu: state.gpu, game: state.game, resolution: state.resolution,
+                quality: state.quality, rt: state.rt, upscaler: state.upscaler, fg: state.fg,
+                ramGb: state.ramGb, ramSpeed: state.ramSpeed };
+  const r = estimate(cfg);
+
+  const blockedEl = document.getElementById("blocked");
+  const resultEl = document.getElementById("result");
+
+  if (r.blocked) {
+    blockedEl.classList.remove("hidden");
+    blockedEl.innerHTML = `<b>Cannot run.</b> ${r.reason}`;
+    resultEl.classList.add("hidden");
+    return;
+  }
+  blockedEl.classList.add("hidden");
+  resultEl.classList.remove("hidden");
+
+  /* headline number */
+  const tone = fpsClass(r.fps);
+  const numEl = document.getElementById("fpsNum");
+  numEl.className = `num ${tone.cls} ${tone.glow}`;
+  animateNumber(numEl, r.fps);
+
+  const v = document.getElementById("verdict");
+  v.className = `pf-verdict ${tone.cls}`;
+  v.textContent = r.verdict;
+  document.getElementById("expNote").textContent = r.experience +
+    (r.fgMode !== "off" ? ` · ${r.preFgFps} real frames + generated` : "");
+
+  /* VRAM */
+  renderVramGauge(document.getElementById("vramGauge"), r.vram, r.gpu);
+  const vn = document.getElementById("vramNote");
+  if (r.vram.state === "over") {
+    vn.className = "pf-note red";
+    vn.innerHTML = `<b>VRAM overflow.</b> This scene needs ≈${r.vram.required.toFixed(1)} GB but the ${r.gpu.name} only has ` +
+      `${r.gpu.vram} GB (${r.vram.usable.toFixed(1)} GB usable after the desktop). ${r.vram.overflow.toFixed(1)} GB is being spilled into system RAM, ` +
+      `which costs about <b>${Math.round((1 - r.vram.penalty) * 100)}% of your frames</b> and causes visible stutter as textures stream back in.`;
+  } else if (r.vram.state === "tight") {
+    vn.className = "pf-note";
+    vn.innerHTML = `<b>Tight.</b> ${r.vram.required.toFixed(1)} GB of ${r.gpu.vram} GB — ${Math.round(r.vram.fill * 100)}% full. ` +
+      `Any background app using VRAM will tip you into spill territory.`;
   } else {
-    ramSel.value = options[0];
+    vn.className = "pf-note green";
+    vn.innerHTML = `<b>Comfortable.</b> ${r.vram.required.toFixed(1)} GB of ${r.gpu.vram} GB (${Math.round(r.vram.fill * 100)}% used). ` +
+      `No spill, no stutter from memory pressure.`;
   }
+
+  /* breakdown stats */
+  const bn = r.bottleneck;
+  document.getElementById("stats").innerHTML = `
+    <div class="pf-stat"><div class="pf-stat-label">GPU ceiling</div>
+      <div class="pf-stat-value">${fmt(Math.round(r.gpuFps))}<small> fps</small></div>
+      <div class="pf-stat-note">After RT, upscaling and quality</div></div>
+    <div class="pf-stat"><div class="pf-stat-label">CPU ceiling</div>
+      <div class="pf-stat-value">${fmt(Math.round(r.cpuFps))}<small> fps</small></div>
+      <div class="pf-stat-note">Most the ${r.cpu.name.split(" ").slice(-1)} can feed</div></div>
+    <div class="pf-stat"><div class="pf-stat-label">Bottleneck</div>
+      <div class="pf-stat-value ${bn.kind === "cpu" ? "c-orange" : bn.kind === "gpu" ? "c-cyan" : "c-green"}">${bn.kind === "balanced" ? "Balanced" : bn.kind.toUpperCase()}</div>
+      <div class="pf-stat-note">${bn.kind === "balanced" ? "Both parts are well matched" : `≈${bn.pct}% of headroom lost`}</div></div>
+    <div class="pf-stat"><div class="pf-stat-label">VRAM</div>
+      <div class="pf-stat-value ${r.vram.state === "over" ? "c-red" : r.vram.state === "tight" ? "c-orange" : "c-green"}">${r.vram.required.toFixed(1)}<small> / ${r.gpu.vram} GB</small></div>
+      <div class="pf-stat-note">${r.vram.state === "over" ? r.vram.overflow.toFixed(1) + " GB spilling" : "Within budget"}</div></div>
+    <div class="pf-stat"><div class="pf-stat-label">Ray tracing</div>
+      <div class="pf-stat-value">${r.rtLevel === "off" ? "—" : "×" + r.rtMul.toFixed(2)}</div>
+      <div class="pf-stat-note">${RT_LEVELS[r.rtLevel]?.label ?? "Off"}${r.rtLevel === "pt" && r.game.pt ? " · " + r.game.pt.name : ""}</div></div>
+    <div class="pf-stat"><div class="pf-stat-label">Upscaling</div>
+      <div class="pf-stat-value">${state.upscaler === "off" ? "Native" : "×" + r.upMul.toFixed(2)}</div>
+      <div class="pf-stat-note">${upscalerName(r.gpu)}</div></div>
+    <div class="pf-stat"><div class="pf-stat-label">Frame gen</div>
+      <div class="pf-stat-value">${r.fgMode === "off" ? "Off" : "×" + r.fg.mul.toFixed(2)}</div>
+      <div class="pf-stat-note">${r.fgMode === "off" ? "No extra latency" : "+" + r.latencyMs + " ms latency"}</div></div>
+    <div class="pf-stat"><div class="pf-stat-label">Memory</div>
+      <div class="pf-stat-value ${r.ram.state === "ok" ? "c-green" : "c-orange"}">${r.ramGb ?? state.ramGb}<small> GB</small></div>
+      <div class="pf-stat-note">${r.ram.speedLabel} · ${r.ram.state === "ok" ? "healthy" : r.ram.state}</div></div>`;
+
+  /* RT tier chart */
+  const tiers = Object.keys(RT_LEVELS).filter(k =>
+    k === "off" || (gameSupportsRT(r.game) && isRT(r.gpu) && (k !== "pt" || gameSupportsPT(r.game))));
+  const vals = [], labs = [];
+  tiers.forEach(t => {
+    const rr = estimate({ ...cfg, rt: t });
+    vals.push(rr.fps);
+    labs.push(t === "off" ? "Off" : t === "pt" ? "Path<br>Tracing" : t[0].toUpperCase() + t.slice(1));
+  });
+  document.getElementById("rtChart").innerHTML = sparkline(vals, labs, tiers.indexOf(state.rt));
+  mountCharts(document.getElementById("rtChart"));
+
+  /* tips */
+  const tips = buildTips(r);
+  const tipsEl = document.getElementById("tips");
+  if (r.rr === undefined && state.rr === "on" && state.rt === "off") {
+    tips.unshift("Ray reconstruction does nothing without ray tracing — turn RT on first.");
+  }
+  tipsEl.className = "pf-note" + (r.vram.state === "over" ? " red" : "");
+  tipsEl.innerHTML = tips.length ? "<ul>" + tips.map(t => `<li>${t}</li>`).join("") + "</ul>" :
+    "Nothing to fix — this configuration is already comfortable. Enjoy the game.";
 }
 
-/* CPU bottleneck detection */
-function getCpuGpuWeights(game, resolution) {
-  const diff = game.difficulty;
-  const res  = resolution;
+/* ------------------------------------------------------------------- wiring */
+["cpu","gpu","game","resolution","quality","rt","rr","upscaler","fg","ramAmount","ramSpeed"].forEach(id => {
+  on(id, "change", () => {
+    const el = document.getElementById(id);
+    if (id === "ramAmount") state.ramGb = parseInt(el.value);
+    else state[id] = el.value;
+    render();
+  });
+});
+on("run", "click", () => { render(); toast("Estimate recalculated"); });
 
-  if (diff === "light" && res === "1080p") {
-    return { cpuW: 0.75, gpuW: 0.25 };
-  }
-  if (diff === "heavy" && res === "4K") {
-    return { cpuW: 0.25, gpuW: 0.75 };
-  }
-  if (diff === "medium") {
-    return { cpuW: 0.45, gpuW: 0.55 };
-  }
-  return { cpuW: 0.35, gpuW: 0.65 };
-}
-
-/* Upscaling logic */
-function getUpscalingMultiplier(gpuInfo, dlssMode, dccMode) {
-  if (gpuInfo.vendor === "nvidia") {
-    return gpuInfo.gen === "rtx50" ? dlss50[dlssMode] : dlss40[dlssMode];
-  }
-  if (gpuInfo.vendor === "amd") {
-    return gpuInfo.gen === "amd9" ? fsr[dlssMode] : 1.0;
-  }
-  if (gpuInfo.vendor === "ics") {
-    return dccMultipliers[dccMode];
-  }
-  return 1.0;
-}
-
-/* Ray Tracing loss */
-function getRtLossMultiplier(gpuInfo, rtLevel) {
-  if (rtLevel === "off") return 1.0;
-
-  let baseLoss;
-  if (rtLevel === "low")    baseLoss = 0.18;
-  else if (rtLevel === "medium") baseLoss = 0.3;
-  else baseLoss = 0.45;
-
-  let strengthFactor;
-  if (gpuInfo.cls === "ultra") strengthFactor = 0.6;
-  else if (gpuInfo.cls === "strong") strengthFactor = 0.75;
-  else if (gpuInfo.cls === "medium") strengthFactor = 1.0;
-  else strengthFactor = 1.2;
-
-  const loss = baseLoss * strengthFactor;
-  return Math.max(0.4, 1.0 - loss);
-}
-
-/* Ray Reconstruction gain */
-function getRrGainMultiplier(game, rrOn) {
-  if (!rrOn) return 1.0;
-
-  let gain;
-  if (game.size === "small") gain = 0.045;
-  else if (game.size === "medium") gain = 0.025;
-  else gain = 0.018;
-
-  return 1.0 + gain;
-}
-
-/* RAM amount multiplier */
-function getRamAmountMultiplier(game, ramGb) {
-  const minRam = game.minRam || 4;
-  if (ramGb <= minRam) return 1.0;
-
-  // hvert "steg" over minimum gir litt bonus
-  const steps = Math.max(0, ramAmounts.indexOf(ramGb) - ramAmounts.indexOf(minRam));
-  const bonus = Math.min(0.10, steps * 0.03); // maks +10%
-  return 1.0 + bonus;
-}
-
-/* RAM speed multiplier */
-function getRamSpeedMultiplier(speedKey) {
-  return ramSpeedMultipliers[speedKey] || 1.0;
-}
-
-/* Experience rating */
-function getExperience(fps) {
-  if (fps < 30)  return "Unplayable";
-  if (fps < 60)  return "Playable but not smooth";
-  if (fps < 120) return "Smooth";
-  if (fps < 160) return "Very smooth";
-  return "Ultra smooth / Esports level";
-}
-
-/* FPS color class */
-function getFpsClass(fps) {
-  if (fps < 30)  return "fps-red";
-  if (fps < 60)  return "fps-orange";
-  if (fps < 120) return "fps-white";
-  if (fps < 160) return "fps-green";
-  return "fps-blue";
-}
-
-/* Suggestions */
-function buildSuggestions(fps, gpuInfo, dlssMode, dccMode, fgOn, res, game, gfx, rtLevel, rrOn, ramGb) {
-  if (fps >= 120) return "";
-
-  const tips = [];
-
-  tips.push("• Lower resolution (for example 1440p → 1080p).");
-  if (gfx !== "low") tips.push("• Lower graphics quality (shadows, post-processing, foliage).");
-
-  if (gpuInfo.vendor === "nvidia") {
-    if (dlssMode === "off") tips.push("• Enable DLSS (Quality or Balanced) for a big FPS boost.");
-    else if (dlssMode === "quality") tips.push("• Try DLSS Balanced or Performance for even more FPS.");
-    if (!fgOn && (gpuInfo.gen === "rtx40" || gpuInfo.gen === "rtx50"))
-      tips.push("• Enable Frame Generation if latency is acceptable.");
-  }
-
-  if (gpuInfo.vendor === "amd") {
-    if (gpuInfo.gen === "amd9") {
-      if (dlssMode === "off") tips.push("• Enable FSR (Quality or Balanced) to improve performance.");
-      else tips.push("• Use FSR Performance or Ultra Performance if image quality is acceptable.");
-    } else {
-      tips.push("• Older Radeon GPUs benefit less from FSR – consider lowering resolution.");
-    }
-  }
-
-  if (gpuInfo.vendor === "ics") {
-    if (dccMode === "off") tips.push("• Enable DCC (Quality or Balanced) for a strong uplift.");
-    else if (dccMode === "quality") tips.push("• Try DCC Balanced or Performance for maximum FPS.");
-    if (!fgOn) tips.push("• Enable DCC‑FG to leverage ICS frame generation.");
-  }
-
-  if (rtLevel !== "off") tips.push("• Lower or disable Ray Tracing for a massive FPS increase.");
-  if (rrOn && rtLevel === "off") tips.push("• Ray Reconstruction is most useful together with Ray Tracing.");
-
-  if (res === "4K") tips.push("• Consider playing at 1440p or 1080p instead of native 4K.");
-
-  const minRam = game.minRam || 4;
-  if (ramGb === minRam) {
-    tips.push("• You are at minimum RAM – more RAM can improve stutters and 1% lows.");
-  }
-
-  if (game.difficulty === "heavy" && fps < 60)
-    tips.push("• This is a very demanding title – consider a stronger GPU for high settings.");
-
-  return tips.join("<br>");
-}
-
-/* Main FPS calculation */
-function estimateFPS() {
-  const cpuName  = document.getElementById("cpu").value;
-  const gpuName  = document.getElementById("gpu").value;
-  const gameName = document.getElementById("game").value;
-  const res      = document.getElementById("resolution").value;
-  const gfx      = document.getElementById("gfx").value;
-  const dlss     = document.getElementById("dlss").value;
-  const dcc      = document.getElementById("dcc").value;
-  const fg       = document.getElementById("fg").value;
-  const rtLevel  = document.getElementById("rt").value;
-  const rr       = document.getElementById("rr").value;
-  const ramGb    = parseInt(document.getElementById("ramAmount").value);
-  const ramSpeedKey = document.getElementById("ramSpeed").value;
-
-  const cpu     = cpuScores[cpuName];
-  const gpuInfo = gpuData[gpuName];
-  let   gpu     = gpuInfo.score * 1.08; // +8% rå GPU-boost
-  const game    = gameMultipliers[gameName];
-  const resMul  = resolutionMultipliers[res];
-  const gfxMul  = qualityMultipliers[gfx];
-
-  const weights = getCpuGpuWeights(game, res);
-  let cpuW = weights.cpuW;
-  let gpuW = weights.gpuW;
-
-  let baseFps = (cpu * cpuW + gpu * gpuW) * game.mul * resMul * gfxMul / 1000;
-
-  if (game.difficulty === "light") {
-    const strengthMul = gpuStrengthScaling[gpuInfo.cls] || 1.0;
-    baseFps *= strengthMul;
-  }
-
-  const upMul = getUpscalingMultiplier(gpuInfo, dlss, dcc);
-  baseFps *= upMul;
-
-  const rtMul = getRtLossMultiplier(gpuInfo, rtLevel);
-  baseFps *= rtMul;
-
-  const rrOn = (rr === "on");
-  const rrMul = getRrGainMultiplier(game, rrOn);
-  baseFps *= rrMul;
-
-  const fgOn = (fg === "on");
-  if (fgOn) {
-    const fgMul = fgMultipliers[gpuInfo.gen] || 1.0;
-    baseFps *= fgMul;
-  }
-
-  const ramAmountMul = getRamAmountMultiplier(game, ramGb);
-  const ramSpeedMul  = getRamSpeedMultiplier(ramSpeedKey);
-  baseFps *= ramAmountMul * ramSpeedMul;
-
-  let fps = Math.min(Math.max(baseFps, 10), 3000);
-  const rounded = Math.round(fps);
-
-  const resultEl     = document.getElementById("result");
-  const experienceEl = document.getElementById("experience");
-  const tipsFrame    = document.getElementById("tips");
-  const tipsList     = document.getElementById("tips-list");
-
-  resultEl.style.display = "block";
-  resultEl.className = "result-box " + getFpsClass(rounded);
-  resultEl.innerHTML = `Estimated FPS: <strong>${rounded}</strong>`;
-
-  experienceEl.innerText = getExperience(rounded);
-
-  const tipsHtml = buildSuggestions(
-    rounded,
-    gpuInfo,
-    dlss,
-    dcc,
-    fgOn,
-    res,
-    game,
-    gfx,
-    rtLevel,
-    rrOn,
-    ramGb
-  );
-
-  if (tipsHtml) {
-    tipsFrame.style.display = "block";
-    tipsList.innerHTML = tipsHtml;
-  } else {
-    tipsFrame.style.display = "none";
-    tipsList.innerHTML = "";
-  }
-}
+render();
 </script>
-
 </body>
 </html>

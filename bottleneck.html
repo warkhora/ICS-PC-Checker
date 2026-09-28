@@ -2,942 +2,175 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ICS Regent – Bottleneck Analyzer</title>
-
-<style>
-  body {
-    margin: 0;
-    padding: 40px;
-    background: linear-gradient(135deg, #050505, #000000);
-    color: #e6e6e6;
-    font-family: "Segoe UI", system-ui, sans-serif;
-  }
-
-  .ics-container {
-    max-width: 1100px;
-    margin: auto;
-    backdrop-filter: blur(18px);
-  }
-
-  .ics-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .ics-logo {
-    font-size: 32px;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    color: #ffd700;
-    font-weight: 600;
-  }
-
-  .ics-subtitle {
-    color: #bbb;
-    margin-top: 8px;
-    font-size: 15px;
-  }
-
-  .ics-frame {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 25px;
-    margin-bottom: 30px;
-    border-radius: 18px;
-    transition: 0.3s ease;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.08);
-  }
-
-  .ics-frame:hover {
-    border-color: rgba(255, 215, 0, 0.6);
-    box-shadow: 0 0 35px rgba(255, 215, 0, 0.25);
-    transform: translateY(-3px);
-  }
-
-  select, button {
-    width: 100%;
-    background: rgba(20, 20, 20, 0.85);
-    color: #eee;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    padding: 12px;
-    border-radius: 10px;
-    margin: 10px 0;
-    transition: 0.2s;
-    font-size: 15px;
-    backdrop-filter: blur(12px);
-    box-sizing: border-box;
-  }
-
-  select:hover, button:hover {
-    border-color: #ffd700;
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
-  }
-
-  select option {
-    background: #111;
-    color: #eee;
-  }
-
-  button {
-    cursor: pointer;
-    background: rgba(255, 215, 0, 0.15);
-    font-weight: 600;
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .row-3 {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .ics-nav {
-    width: 100%;
-    background: rgba(0,0,0,0.65);
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    padding: 16px 24px;
-    display: flex;
-    gap: 30px;
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    backdrop-filter: blur(12px);
-    margin: -40px -40px 40px -40px;
-  }
-
-  .ics-nav a {
-    color: #ffd700;
-    text-decoration: none;
-    font-size: 16px;
-    letter-spacing: 1px;
-    transition: 0.25s ease;
-    padding-bottom: 4px;
-  }
-
-  .ics-nav a:hover {
-    color: white;
-    text-shadow: 0 0 10px #ffd700;
-  }
-
-  .ics-nav a.active {
-    color: white;
-    border-bottom: 2px solid #ffd700;
-    text-shadow: 0 0 12px #ffd700;
-  }
-
-  .tag {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    margin-right: 6px;
-    border: 1px solid rgba(255,255,255,0.2);
-  }
-
-  .tag-info { color: #7dd3fc; border-color: #0ea5e9; }
-
-  .section-title {
-    font-size: 15px;
-    font-weight: 600;
-    margin-top: 18px;
-    margin-bottom: 6px;
-    color: #f5f5f5;
-  }
-
-  .result-grid-5 {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 10px;
-  }
-
-  .result-pill {
-    background: rgba(0,0,0,0.7);
-    border-radius: 14px;
-    padding: 10px 12px;
-    border: 1px solid rgba(255,255,255,0.18);
-    font-size: 12px;
-  }
-
-  .result-label {
-    font-weight: 600;
-    color: #ffd700;
-    margin-bottom: 4px;
-    font-size: 12px;
-  }
-
-  .result-value {
-    font-size: 18px;
-    font-weight: 700;
-  }
-
-  .note {
-    font-size: 11px;
-    color: #cfcfcf;
-    margin-top: 4px;
-  }
-
-  .bar-outer {
-    width: 100%;
-    height: 22px;
-    border-radius: 999px;
-    background: rgba(0,0,0,0.85);
-    border: 1px solid rgba(255,255,255,0.18);
-    overflow: hidden;
-    position: relative;
-    margin-top: 4px;
-  }
-
-  .bar-inner {
-    height: 100%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #00ff9d, #ffd700, #ff4b4b);
-    transition: width 0.4s ease;
-  }
-
-  .bar-label {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 600;
-    text-shadow: 0 0 6px rgba(0,0,0,0.9);
-  }
-
-  .bottleneck-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    font-size: 13px;
-  }
-
-  .bottleneck-table th {
-    background: rgba(0,0,0,0.85);
-    padding: 10px;
-    border-bottom: 2px solid rgba(255,255,255,0.18);
-    text-align: left;
-  }
-
-  .bottleneck-table td {
-    padding: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .ai-summary {
-    margin-top: 10px;
-    font-size: 13px;
-    color: #d0d0d0;
-    line-height: 1.6;
-  }
-
-  .small-label {
-    font-size: 12px;
-    color: #ccc;
-  }
-
-  .graph-container {
-    margin-top: 12px;
-    background: rgba(0,0,0,0.7);
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.18);
-    padding: 12px;
-  }
-
-  .graph-bars {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 10px;
-    align-items: flex-end;
-    height: 140px;
-  }
-
-  .graph-bar {
-    position: relative;
-    background: rgba(255,255,255,0.06);
-    border-radius: 999px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.18);
-  }
-
-  .graph-bar-fill {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(180deg, #ff4b4b, #ffd700);
-    transition: height 0.4s ease;
-  }
-
-  .graph-bar-label {
-    text-align: center;
-    font-size: 11px;
-    margin-top: 4px;
-  }
-
-  .graph-bar-value {
-    position: absolute;
-    top: 4px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 10px;
-    text-shadow: 0 0 6px rgba(0,0,0,0.9);
-  }
-
-  @media (max-width: 1050px) {
-    .result-grid-5 {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .graph-bars {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      height: 160px;
-    }
-  }
-
-  @media (max-width: 700px) {
-    .row, .row-3 {
-      grid-template-columns: 1fr;
-    }
-    .result-grid-5 {
-      grid-template-columns: 1fr;
-    }
-    .graph-bars {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      height: 180px;
-    }
-  }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bottleneck Analyzer — PCFORGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/theme.css">
 </head>
 <body>
 
-<div class="ics-nav">
-  <a href="index.html" class="nav-link" data-page="index">CPU/GPU Comparison</a>
-  <a href="fps.html" class="nav-link" data-page="fps">FPS Estimator</a>
-  <a href="canyourunit.html" class="nav-link" data-page="canyourunit">Can You Run It?</a>
-  <a href="build.html" class="nav-link" data-page="build">Build Your PC</a>
-  <a href="pclifetime.html" class="nav-link" data-page="pclifetime">PC Lifespan</a>
-  <a href="thermals.html" class="nav-link" data-page="thermals">Thermal & Cooling</a>
-  <a href="consumption.html" class="nav-link" data-page="consumption">Power Consumption</a>
-  <a href="storage.html" class="nav-link" data-page="storage">Storage & Load Times</a>
-</div>
+<div class="pf-container">
 
-<script>
-  const current = window.location.pathname.split("/").pop().toLowerCase();
-  document.querySelectorAll(".nav-link").forEach(link => {
-    if (current.includes(link.getAttribute("data-page"))) {
-      link.classList.add("active");
-    }
-  });
-</script>
+  <header class="pf-hero">
+    <div class="pf-eyebrow">● System balance</div>
+    <h1>Bottleneck Analyzer</h1>
+    <p>Which part of your PC is holding the others back — and by how much? CPU, GPU, system
+       RAM, VRAM and storage are all measured against the same scenario.</p>
+  </header>
 
-<div class="ics-container">
-
-  <div class="ics-header">
-    <div class="ics-logo">ICS REGENT</div>
-    <div class="ics-subtitle">Bottleneck Analyzer — CPU, GPU, RAM, VRAM & Storage Balance</div>
-  </div>
-
-  <!-- INPUT FRAME -->
-  <div class="ics-frame">
-    <div class="tag tag-info">Bottleneck v1</div>
-    <h2 style="margin-top:10px;">System & Game Profile</h2>
-    <p style="font-size:13px;color:#ccc;margin-bottom:14px;">
-      Select your CPU, GPU, memory, resolution and game. The analyzer estimates where your system is limited:
-      CPU, GPU, RAM, VRAM or storage — and how severe each bottleneck is for this scenario.
-    </p>
-
-    <div class="row">
-      <div>
-        <label>CPU</label>
-        <select id="cpu"></select>
-      </div>
-      <div>
-        <label>GPU</label>
-        <select id="gpu"></select>
-      </div>
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">🧪</span> Scenario</h2>
+    <div class="pf-grid pf-grid-3">
+      <div><label class="pf-label" for="cpu">CPU</label><select id="cpu"></select></div>
+      <div><label class="pf-label" for="gpu">GPU</label><select id="gpu"></select></div>
+      <div><label class="pf-label" for="game">Game</label><select id="game"></select></div>
     </div>
-
-    <div class="row">
-      <div>
-        <label>RAM Configuration</label>
-        <select id="ramConfig">
-          <option value="16_4800">16 GB DDR5 4800 MHz</option>
-          <option value="16_5600">16 GB DDR5 5600 MHz</option>
-          <option value="32_5600">32 GB DDR5 5600 MHz</option>
-          <option value="32_6000" selected>32 GB DDR5 6000 MHz</option>
-          <option value="64_6000">64 GB DDR5 6000 MHz</option>
-        </select>
-      </div>
-      <div>
-        <label>Storage Type</label>
-        <select id="storageType">
-          <option value="hdd">HDD (spinning)</option>
-          <option value="sata">SATA SSD</option>
-          <option value="nvme3">NVMe Gen3</option>
-          <option value="nvme4" selected>NVMe Gen4</option>
-          <option value="nvme5">NVMe Gen5</option>
-        </select>
-      </div>
+    <div class="pf-grid pf-grid-3" style="margin-top:14px;">
+      <div><label class="pf-label" for="resolution">Resolution</label><select id="resolution"></select></div>
+      <div><label class="pf-label" for="quality">Preset</label><select id="quality"></select></div>
+      <div><label class="pf-label" for="rt">Ray tracing</label><select id="rt"></select></div>
     </div>
-
-    <div class="row-3">
-      <div>
-        <label>Game</label>
-        <select id="game">
-          <option value="cyberpunk">Cyberpunk 2077</option>
-          <option value="gta6">GTA VI</option>
-          <option value="starfield">Starfield</option>
-          <option value="helldivers2">Helldivers 2</option>
-          <option value="rdr2">Red Dead Redemption 2</option>
-          <option value="cod">Call of Duty</option>
-          <option value="eldenring">Elden Ring</option>
-          <option value="fortnite">Fortnite</option>
-          <option value="msfs2024">Flight Simulator 2024</option>
-          <option value="bg3">Baldur's Gate 3</option>
-          <option value="witcher4">The Witcher 4 (future)</option>
-          <option value="fh5">Forza Horizon 5</option>
-          <option value="fh6" selected>Forza Horizon 6</option>
-        </select>
-      </div>
-      <div>
-        <label>Graphics Preset</label>
-        <select id="preset">
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="ultra" selected>Ultra</option>
-          <option value="rt">Ray Tracing</option>
-          <option value="pt">Path Tracing</option>
-        </select>
-      </div>
-      <div>
-        <label>Resolution</label>
-        <select id="resolution">
-          <option value="1080">1080p</option>
-          <option value="1440" selected>1440p</option>
-          <option value="2160">4K</option>
-          <option value="3440x1440">Ultrawide 3440×1440</option>
-          <option value="8k">8K (extreme)</option>
-        </select>
-      </div>
+    <div class="pf-grid pf-grid-3" style="margin-top:14px;">
+      <div><label class="pf-label" for="ramAmount">System RAM</label><select id="ramAmount"></select></div>
+      <div><label class="pf-label" for="ramSpeed">RAM speed</label><select id="ramSpeed"></select></div>
+      <div><label class="pf-label" for="storageType">Game drive</label><select id="storageType"></select></div>
     </div>
+    <button class="pf-btn" id="run">Analyze</button>
+  </section>
 
-    <button onclick="analyzeBottlenecks()">Analyze Bottlenecks</button>
-  </div>
-
-  <!-- RESULT FRAME -->
-  <div class="ics-frame" id="resultFrame" style="display:none;">
-    <h2>Component Bottlenecks & System Balance</h2>
-
-    <div class="small-label" id="scenarioLabel"></div>
-
-    <!-- 5 RESULT PILLS -->
-    <div class="result-grid-5">
-      <div class="result-pill">
-        <div class="result-label">CPU Bottleneck</div>
-        <div class="result-value" id="cpuBottleLabel"></div>
-        <div class="bar-outer">
-          <div class="bar-inner" id="cpuBottleBar"></div>
-          <div class="bar-label" id="cpuBottleBarLabel"></div>
-        </div>
-        <div class="note" id="cpuBottleNote"></div>
-      </div>
-
-      <div class="result-pill">
-        <div class="result-label">GPU Bottleneck</div>
-        <div class="result-value" id="gpuBottleLabel"></div>
-        <div class="bar-outer">
-          <div class="bar-inner" id="gpuBottleBar"></div>
-          <div class="bar-label" id="gpuBottleBarLabel"></div>
-        </div>
-        <div class="note" id="gpuBottleNote"></div>
-      </div>
-
-      <div class="result-pill">
-        <div class="result-label">RAM Bottleneck</div>
-        <div class="result-value" id="ramBottleLabel"></div>
-        <div class="bar-outer">
-          <div class="bar-inner" id="ramBottleBar"></div>
-          <div class="bar-label" id="ramBottleBarLabel"></div>
-        </div>
-        <div class="note" id="ramBottleNote"></div>
-      </div>
-
-      <div class="result-pill">
-        <div class="result-label">VRAM Bottleneck</div>
-        <div class="result-value" id="vramBottleLabel"></div>
-        <div class="bar-outer">
-          <div class="bar-inner" id="vramBottleBar"></div>
-          <div class="bar-label" id="vramBottleBarLabel"></div>
-        </div>
-        <div class="note" id="vramBottleNote"></div>
-      </div>
-
-      <div class="result-pill">
-        <div class="result-label">Storage Bottleneck</div>
-        <div class="result-value" id="storageBottleLabel"></div>
-        <div class="bar-outer">
-          <div class="bar-inner" id="storageBottleBar"></div>
-          <div class="bar-label" id="storageBottleBarLabel"></div>
-        </div>
-        <div class="note" id="storageBottleNote"></div>
-      </div>
+  <section class="pf-card reveal">
+    <h2><span class="ico">📉</span> Where your system is limited</h2>
+    <div id="blocked" class="pf-note red hidden"></div>
+    <div id="out">
+      <div class="pf-grid pf-grid-3" id="pills"></div>
+      <div class="pf-section-title">Frame delivery</div>
+      <div id="chart"></div>
+      <div class="pf-section-title">Detail</div>
+      <div class="pf-scroll"><table class="pf-table" id="table"></table></div>
+      <div class="pf-summary" id="summary"></div>
     </div>
-
-    <!-- GRAPH -->
-    <div class="section-title">Bottleneck Distribution</div>
-    <div class="graph-container">
-      <div class="graph-bars">
-        <div>
-          <div class="graph-bar">
-            <div class="graph-bar-fill" id="cpuGraphFill" style="height:0%;"></div>
-            <div class="graph-bar-value" id="cpuGraphValue"></div>
-          </div>
-          <div class="graph-bar-label">CPU</div>
-        </div>
-        <div>
-          <div class="graph-bar">
-            <div class="graph-bar-fill" id="gpuGraphFill" style="height:0%;"></div>
-            <div class="graph-bar-value" id="gpuGraphValue"></div>
-          </div>
-          <div class="graph-bar-label">GPU</div>
-        </div>
-        <div>
-          <div class="graph-bar">
-            <div class="graph-bar-fill" id="ramGraphFill" style="height:0%;"></div>
-            <div class="graph-bar-value" id="ramGraphValue"></div>
-          </div>
-          <div class="graph-bar-label">RAM</div>
-        </div>
-        <div>
-          <div class="graph-bar">
-            <div class="graph-bar-fill" id="vramGraphFill" style="height:0%;"></div>
-            <div class="graph-bar-value" id="vramGraphValue"></div>
-          </div>
-          <div class="graph-bar-label">VRAM</div>
-        </div>
-        <div>
-          <div class="graph-bar">
-            <div class="graph-bar-fill" id="storageGraphFill" style="height:0%;"></div>
-            <div class="graph-bar-value" id="storageGraphValue"></div>
-          </div>
-          <div class="graph-bar-label">Storage</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TABLE -->
-    <div class="section-title">Component Breakdown</div>
-    <table class="bottleneck-table" id="bottleneckTable"></table>
-
-    <!-- SUMMARY -->
-    <div class="section-title">Bottleneck Narrative</div>
-    <div class="ai-summary" id="bottleneckSummary"></div>
-  </div>
+  </section>
 
 </div>
 
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
 <script>
-// =========================
-// CPU DATABASE (same pattern as other pages)
-// Add new CPUs by adding one more object here.
-// =========================
-const cpuDb = [
-  { name: "Intel Core i5-14400F", score: 1.0 },
-  { name: "Intel Core i5-14600K", score: 1.15 },
-  { name: "Intel Core i7-14700K", score: 1.3 },
-  { name: "Intel Core i9-14900K", score: 1.45 },
+const S = { cpu: "9800x3d", gpu: "rtx5070", game: "fh6", resolution: "1440p", quality: "ultra",
+            rt: "high", ramGb: 32, ramSpeed: "ddr5-6000", storage: "nvme4" };
 
-  { name: "Ryzen 5 9600X", score: 1.05 },
-  { name: "Ryzen 7 9700X", score: 1.2 },
-  { name: "Ryzen 7 9800X3D", score: 1.35 },
-  { name: "Ryzen 9 9900X3D", score: 1.45 },
-  { name: "Ryzen 9 9950X3D", score: 1.55 },
+fillSelect(document.getElementById("cpu"), CPUS.filter(c => !c.integrated), { groupKey: "brand", value: S.cpu });
+fillSelect(document.getElementById("gpu"), GPUS, { groupKey: "brand", value: S.gpu, labelFn: g => `${g.name} — ${g.vram} GB` });
+fillSelect(document.getElementById("game"), GAMES, { groupKey: "genre", value: S.game });
+fillEnumSelect(document.getElementById("resolution"), RESOLUTIONS, S.resolution);
+fillEnumSelect(document.getElementById("quality"), QUALITY, S.quality);
+fillSelect(document.getElementById("ramAmount"), RAM_AMOUNTS.map(a => ({ id: a, name: a + " GB" })), { value: 32 });
+fillEnumSelect(document.getElementById("ramSpeed"), RAM_SPEEDS, S.ramSpeed);
+fillEnumSelect(document.getElementById("storageType"), STORAGE_TYPES, S.storage);
 
-  { name: "Threadripper 7960X", score: 1.6 },
-  { name: "Threadripper 7970X", score: 1.7 },
-  { name: "Threadripper 7980X", score: 1.8 },
-
-  { name: "Intel Ultra 5", score: 1.1 },
-  { name: "Intel Ultra 7", score: 1.25 },
-  { name: "Intel Ultra 9", score: 1.4 }
-];
-
-// =========================
-// GPU DATABASE (same pattern as other pages)
-// Add new GPUs by adding one more object here.
-// power is a relative performance index, vram in GB.
-// =========================
-const gpuDb = [
-  { name: "GeForce RTX 3050 6GB",  power: 0.55, vram: 6 },
-  { name: "GeForce RTX 3050 8GB",  power: 0.6,  vram: 8 },
-  { name: "GeForce RTX 3060",      power: 0.75, vram: 12 },
-  { name: "GeForce RTX 3060 Ti",   power: 0.85, vram: 8 },
-  { name: "GeForce RTX 3070",      power: 0.95, vram: 8 },
-  { name: "GeForce RTX 3070 Ti",   power: 1.0,  vram: 8 },
-  { name: "GeForce RTX 3080",      power: 1.15, vram: 10 },
-  { name: "GeForce RTX 3080 Ti",   power: 1.2,  vram: 12 },
-  { name: "GeForce RTX 3090",      power: 1.3,  vram: 24 },
-
-  { name: "GeForce RTX 4050",      power: 0.7,  vram: 8 },
-  { name: "GeForce RTX 4060",      power: 0.85, vram: 8 },
-  { name: "GeForce RTX 4060 Ti",   power: 0.95, vram: 8 },
-  { name: "GeForce RTX 4070",      power: 1.1,  vram: 12 },
-  { name: "GeForce RTX 4070 Super",power: 1.2,  vram: 12 },
-  { name: "GeForce RTX 4070 Ti",   power: 1.3,  vram: 12 },
-  { name: "GeForce RTX 4070 Ti Super", power: 1.35, vram: 16 },
-  { name: "GeForce RTX 4080",      power: 1.5,  vram: 16 },
-  { name: "GeForce RTX 4080 Super",power: 1.55, vram: 16 },
-  { name: "GeForce RTX 4080 Ti",   power: 1.6,  vram: 20 },
-  { name: "GeForce RTX 4080 Ti Super", power: 1.65, vram: 20 },
-  { name: "GeForce RTX 4090",      power: 1.9,  vram: 24 },
-
-  { name: "GeForce RTX 5050",      power: 0.9,  vram: 8 },
-  { name: "GeForce RTX 5060",      power: 1.05, vram: 8 },
-  { name: "GeForce RTX 5060 Ti 8GB",  power: 1.15, vram: 8 },
-  { name: "GeForce RTX 5060 Ti 16GB", power: 1.2,  vram: 16 },
-  { name: "GeForce RTX 5070",      power: 1.35, vram: 12 },
-  { name: "GeForce RTX 5070 Ti",   power: 1.45, vram: 16 },
-  { name: "GeForce RTX 5080",      power: 1.7,  vram: 16 },
-  { name: "GeForce RTX 5090",      power: 2.2,  vram: 32 },
-
-  { name: "Radeon RX 9060",        power: 1.1,  vram: 12 },
-  { name: "Radeon RX 9060 XT",     power: 1.2,  vram: 16 },
-  { name: "Radeon RX 9070",        power: 1.35, vram: 16 },
-  { name: "Radeon RX 9070 XT",     power: 1.5,  vram: 16 },
-
-  { name: "Radeon RX 7900",        power: 1.3,  vram: 20 },
-  { name: "Radeon RX 7900 XT",     power: 1.45, vram: 20 },
-  { name: "Radeon RX 7900 XTX",    power: 1.6,  vram: 24 }
-];
-
-// =========================
-// GAME DATABASE
-// cpuWeight/gpuWeight: how demanding each side is.
-// vramBase: typical VRAM usage at 1440p High.
-// =========================
-const gameDb = {
-  cyberpunk: { name: "Cyberpunk 2077", cpuWeight: 1.0, gpuWeight: 1.1, vramBase: 9, storageWeight: 1.0 },
-  gta6:      { name: "GTA VI",         cpuWeight: 1.05,gpuWeight: 1.0, vramBase: 8, storageWeight: 1.0 },
-  starfield: { name: "Starfield",      cpuWeight: 1.0, gpuWeight: 1.1, vramBase: 10,storageWeight: 1.2 },
-  helldivers2:{name: "Helldivers 2",   cpuWeight: 0.9, gpuWeight: 1.0, vramBase: 7, storageWeight: 0.9 },
-  rdr2:      { name: "Red Dead Redemption 2", cpuWeight: 0.95,gpuWeight: 1.0, vramBase: 7, storageWeight: 1.0 },
-  cod:       { name: "Call of Duty",   cpuWeight: 1.05,gpuWeight: 1.05,vramBase: 8, storageWeight: 1.0 },
-  eldenring: { name: "Elden Ring",     cpuWeight: 0.9, gpuWeight: 0.9, vramBase: 6, storageWeight: 0.8 },
-  fortnite:  { name: "Fortnite",       cpuWeight: 0.85,gpuWeight: 0.8, vramBase: 5, storageWeight: 0.7 },
-  msfs2024:  { name: "Flight Simulator 2024", cpuWeight: 1.2,gpuWeight: 1.1, vramBase: 11,storageWeight: 1.4 },
-  bg3:       { name: "Baldur's Gate 3",cpuWeight: 0.9, gpuWeight: 0.9, vramBase: 6, storageWeight: 0.8 },
-  witcher4:  { name: "The Witcher 4",  cpuWeight: 1.0, gpuWeight: 1.05,vramBase: 8, storageWeight: 1.1 },
-  fh5:       { name: "Forza Horizon 5",cpuWeight: 0.9, gpuWeight: 0.95,vramBase: 7, storageWeight: 0.9 },
-  fh6:       { name: "Forza Horizon 6",cpuWeight: 0.95,gpuWeight: 1.0, vramBase: 8, storageWeight: 1.0 }
-};
-
-// =========================
-// RAM CONFIG
-// =========================
-function ramConfigInfo(key) {
-  if (key === "16_4800") return { size: 16, speed: 4800 };
-  if (key === "16_5600") return { size: 16, speed: 5600 };
-  if (key === "32_5600") return { size: 32, speed: 5600 };
-  if (key === "32_6000") return { size: 32, speed: 6000 };
-  if (key === "64_6000") return { size: 64, speed: 6000 };
-  return { size: 16, speed: 4800 };
-}
-
-// =========================
-// STORAGE CONFIG
-// =========================
-function storageInfo(key) {
-  if (key === "hdd")   return { name: "HDD",      perf: 0.3 };
-  if (key === "sata")  return { name: "SATA SSD", perf: 0.6 };
-  if (key === "nvme3") return { name: "NVMe Gen3",perf: 0.85 };
-  if (key === "nvme4") return { name: "NVMe Gen4",perf: 1.3 };  // was 1.0
-  if (key === "nvme5") return { name: "NVMe Gen5",perf: 1.5 };  // was 1.1
-  return { name: key, perf: 1.0 };
-}
-
-// =========================
-// RESOLUTION & PRESET FACTORS
-// =========================
-function resolutionFactor(res) {
-  if (res === "1080") return { cpu: 1.1, gpu: 0.8, vram: 0.7 };
-  if (res === "1440") return { cpu: 1.0, gpu: 1.0, vram: 1.0 };
-  if (res === "2160") return { cpu: 0.9, gpu: 1.2, vram: 1.3 };
-  if (res === "3440x1440") return { cpu: 0.95, gpu: 1.1, vram: 1.1 };
-  if (res === "8k") return { cpu: 0.85, gpu: 1.4, vram: 1.6 };
-  return { cpu: 1.0, gpu: 1.0, vram: 1.0 };
-}
-
-function presetFactor(preset) {
-  if (preset === "low")    return { gpu: 0.7, vram: 0.6, storage: 0.7 };
-  if (preset === "medium") return { gpu: 0.85,vram: 0.8, storage: 0.85 };
-  if (preset === "high")   return { gpu: 1.0, vram: 1.0, storage: 1.0 };
-  if (preset === "ultra")  return { gpu: 1.1, vram: 1.15,storage: 1.1 };
-  if (preset === "rt")     return { gpu: 1.2, vram: 1.25,storage: 1.1 };
-  if (preset === "pt")     return { gpu: 1.3, vram: 1.35,storage: 1.15 };
-  return { gpu: 1.0, vram: 1.0, storage: 1.0 };
-}
-
-// =========================
-// POPULATE SELECTS
-// =========================
-function populateSelects() {
-  const cpuSel = document.getElementById("cpu");
-  const gpuSel = document.getElementById("gpu");
-
-  cpuDb.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.name;
-    opt.textContent = c.name;
-    cpuSel.appendChild(opt);
+function refreshRtOptions() {
+  const gpu = gpuById(S.gpu), game = gameById(S.game);
+  const sel = document.getElementById("rt");
+  const rtOk = gameSupportsRT(game) && isRT(gpu);
+  sel.innerHTML = "";
+  Object.entries(RT_LEVELS).forEach(([k, v]) => {
+    if (k === "pt" && !gameSupportsPT(game)) return;
+    if (k !== "off" && !rtOk) return;
+    if (game.alwaysPT && k !== "pt") return;
+    const o = document.createElement("option");
+    o.value = k; o.textContent = v.label;
+    sel.appendChild(o);
   });
-
-  gpuDb.forEach(g => {
-    const opt = document.createElement("option");
-    opt.value = g.name;
-    opt.textContent = g.name;
-    gpuSel.appendChild(opt);
-  });
-
-  cpuSel.value = "Ryzen 7 9800X3D";
-  gpuSel.value = "GeForce RTX 5070";
-}
-populateSelects();
-
-// =========================
-// MAIN ANALYSIS
-// =========================
-function analyzeBottlenecks() {
-  const cpuName = document.getElementById("cpu").value;
-  const gpuName = document.getElementById("gpu").value;
-  const ramKey = document.getElementById("ramConfig").value;
-  const storageKey = document.getElementById("storageType").value;
-  const gameKey = document.getElementById("game").value;
-  const preset = document.getElementById("preset").value;
-  const res = document.getElementById("resolution").value;
-
-  const cpu = cpuDb.find(c => c.name === cpuName);
-  const gpu = gpuDb.find(g => g.name === gpuName);
-  const ram = ramConfigInfo(ramKey);
-  const storage = storageInfo(storageKey);
-  const game = gameDb[gameKey];
-  const resF = resolutionFactor(res);
-  const preF = presetFactor(preset);
-
-  // Relative "demand" vs "capacity" model
-  const cpuDemand = game.cpuWeight * resF.cpu;
-  const gpuDemand = game.gpuWeight * resF.gpu * preF.gpu;
-  const vramDemand = game.vramBase * resF.vram * preF.vram;
-  const storageDemand = game.storageWeight * preF.storage;
-
-  const cpuCapacity = cpu.score;
-  const gpuCapacity = gpu.power;
-  const vramCapacity = gpu.vram;
-  const ramCapacityScore = (ram.size / 16) * (ram.speed / 4800); // simple model
-  const storageCapacityScore = storage.perf;
-
-  // Bottleneck % = how much demand exceeds or approaches capacity
-  const cpuBottle = bottleneckPercent(cpuDemand, cpuCapacity);
-  const gpuBottle = bottleneckPercent(gpuDemand, gpuCapacity);
-  const vramBottle = bottleneckPercent(vramDemand, vramCapacity);
-  const ramBottle = bottleneckPercent(cpuDemand * 0.9, ramCapacityScore); // RAM mostly tied to CPU side
-  const storageBottle = bottleneckPercent(storageDemand, storageCapacityScore);
-
-  document.getElementById("resultFrame").style.display = "block";
-
-  const scenario = `
-    Scenario: ${game.name} @ ${resolutionLabel(res)}, ${presetLabel(preset)} preset
-    on ${cpu.name} + ${gpu.name}, ${ram.size} GB DDR5 ${ram.speed} MHz and ${storage.name}.
-  `.replace(/\s+/g, " ").trim();
-  document.getElementById("scenarioLabel").textContent = scenario;
-
-  // Update pills
-  updatePill("cpu", cpuBottle, "cpuBottleLabel", "cpuBottleBar", "cpuBottleBarLabel", "cpuBottleNote", "CPU");
-  updatePill("gpu", gpuBottle, "gpuBottleLabel", "gpuBottleBar", "gpuBottleBarLabel", "gpuBottleNote", "GPU");
-  updatePill("ram", ramBottle, "ramBottleLabel", "ramBottleBar", "ramBottleBarLabel", "ramBottleNote", "RAM");
-  updatePill("vram", vramBottle, "vramBottleLabel", "vramBottleBar", "vramBottleBarLabel", "vramBottleNote", "VRAM");
-  updatePill("storage", storageBottle, "storageBottleLabel", "storageBottleBar", "storageBottleBarLabel", "storageBottleNote", "Storage");
-
-  // Graph
-  setGraphBar("cpuGraphFill", "cpuGraphValue", cpuBottle);
-  setGraphBar("gpuGraphFill", "gpuGraphValue", gpuBottle);
-  setGraphBar("ramGraphFill", "ramGraphValue", ramBottle);
-  setGraphBar("vramGraphFill", "vramGraphValue", vramBottle);
-  setGraphBar("storageGraphFill", "storageGraphValue", storageBottle);
-
-  // Table
-  const primary = primaryBottleneck({ cpu: cpuBottle, gpu: gpuBottle, ram: ramBottle, vram: vramBottle, storage: storageBottle });
-  const tableHtml = `
-    <tr>
-      <th>Component</th>
-      <th>Details</th>
-      <th>Bottleneck</th>
-      <th>Severity</th>
-    </tr>
-    <tr>
-      <td>CPU</td>
-      <td>${cpu.name}</td>
-      <td>${cpuBottle.toFixed(0)}%</td>
-      <td>${severityLabel(cpuBottle)}</td>
-    </tr>
-    <tr>
-      <td>GPU</td>
-      <td>${gpu.name} (${gpu.vram} GB VRAM)</td>
-      <td>${gpuBottle.toFixed(0)}%</td>
-      <td>${severityLabel(gpuBottle)}</td>
-    </tr>
-    <tr>
-      <td>RAM</td>
-      <td>${ram.size} GB DDR5 ${ram.speed} MHz</td>
-      <td>${ramBottle.toFixed(0)}%</td>
-      <td>${severityLabel(ramBottle)}</td>
-    </tr>
-    <tr>
-      <td>VRAM</td>
-      <td>${gpu.vram} GB on ${gpu.name}</td>
-      <td>${vramBottle.toFixed(0)}%</td>
-      <td>${severityLabel(vramBottle)}</td>
-    </tr>
-    <tr>
-      <td>Storage</td>
-      <td>${storage.name}</td>
-      <td>${storageBottle.toFixed(0)}%</td>
-      <td>${severityLabel(storageBottle)}</td>
-    </tr>
-    <tr>
-      <td>Primary Bottleneck</td>
-      <td>${primary.component.toUpperCase()}</td>
-      <td>${primary.value.toFixed(0)}%</td>
-      <td>${severityLabel(primary.value)}</td>
-    </tr>
-  `;
-  document.getElementById("bottleneckTable").innerHTML = tableHtml;
-
-  // Summary
-  const summary = buildSummary(cpu, gpu, ram, storage, game, res, preset,
-    cpuBottle, gpuBottle, ramBottle, vramBottle, storageBottle, primary);
-  document.getElementById("bottleneckSummary").textContent = summary;
+  if (!sel.options.length) { const o = document.createElement("option"); o.value = "off"; o.textContent = "Off"; sel.appendChild(o); }
+  if (![...sel.options].some(o => o.value === S.rt)) S.rt = sel.options[0].value;
+  sel.value = S.rt;
 }
 
-// =========================
-// HELPERS
-// =========================
-function bottleneckPercent(demand, capacity) {
-  if (capacity <= 0) return 100;
-  const ratio = demand / capacity;
-  if (ratio <= 0.7) return 10 * ratio;      // plenty of headroom
-  if (ratio >= 1.3) return 100;             // heavily bottlenecked
-  return 100 * ((ratio - 0.7) / (1.3 - 0.7)); // scale between 0.7 and 1.3
-}
+function run() {
+  refreshRtOptions();
+  const r = estimate({ cpu: S.cpu, gpu: S.gpu, game: S.game, resolution: S.resolution, quality: S.quality,
+                       rt: S.rt, upscaler: "off", fg: "off", ramGb: S.ramGb, ramSpeed: S.ramSpeed });
 
-function updatePill(key, value, labelId, barId, barLabelId, noteId, name) {
-  document.getElementById(labelId).textContent = value.toFixed(0) + " %";
-  const width = Math.min(100, Math.max(5, value));
-  document.getElementById(barId).style.width = width + "%";
-  document.getElementById(barLabelId).textContent = severityLabel(value);
-
-  let note = `${name} is not a significant bottleneck in this scenario.`;
-  if (value > 70) note = `${name} is the dominant bottleneck and strongly limits performance.`;
-  else if (value > 45) note = `${name} is a noticeable bottleneck in demanding scenes.`;
-  else if (value > 25) note = `${name} can become a mild bottleneck in heavy situations.`;
-  document.getElementById(noteId).textContent = note;
-}
-
-function setGraphBar(fillId, valueId, value) {
-  const height = Math.min(100, Math.max(5, value));
-  document.getElementById(fillId).style.height = height + "%";
-  document.getElementById(valueId).textContent = value.toFixed(0) + "%";
-}
-
-function severityLabel(v) {
-  if (v >= 75) return "Severe";
-  if (v >= 50) return "Moderate";
-  if (v >= 25) return "Mild";
-  return "Low";
-}
-
-function primaryBottleneck(values) {
-  let maxKey = "cpu";
-  let maxVal = values.cpu;
-  for (const k of ["gpu","ram","vram","storage"]) {
-    if (values[k] > maxVal) {
-      maxVal = values[k];
-      maxKey = k;
-    }
+  if (r.blocked) {
+    document.getElementById("blocked").classList.remove("hidden");
+    document.getElementById("blocked").innerHTML = `<b>Cannot analyse.</b> ${r.reason}`;
+    document.getElementById("out").classList.add("hidden");
+    return;
   }
-  return { component: maxKey, value: maxVal };
+  document.getElementById("blocked").classList.add("hidden");
+  document.getElementById("out").classList.remove("hidden");
+
+  /* ---- derive a percentage for every subsystem ------------------------- */
+  const cpuLimit = clamp(1 - r.cpuFps / Math.max(r.gpuFps, r.cpuFps), 0, 1) * 100;  // how much the CPU drags
+  const gpuLimit = clamp(1 - r.gpuFps / Math.max(r.gpuFps, r.cpuFps), 0, 1) * 100;
+  const vramLimit = r.vram.overflow > 0 ? clamp((1 - r.vram.penalty) * 100, 0, 100)
+                    : r.vram.fill > 0.92 ? 8 : 0;
+  const ramLimit = r.ram.penalty < 1 ? clamp((1 - r.ram.penalty) * 100, 0, 100) : 0;
+
+  const st = STORAGE_TYPES[S.storage];
+  const stDemand = r.game.storage === "ssd" ? 0.75 : 0.45;                       // how much this game cares
+  const stScore = clamp(st.stream * (st.random / 600), 0, 1);
+  const storageLimit = clamp((1 - stScore) * stDemand * 100, 0, 100);
+
+  const parts = [
+    { key: "cpu",     label: "CPU",     pct: cpuLimit,     tone: cpuLimit > 25 ? "red" : cpuLimit > 10 ? "" : "green",
+      note: `${r.cpu.name} can feed ${fmt(Math.round(r.cpuFps))} fps; the GPU wants ${fmt(Math.round(r.gpuFps))}.` },
+    { key: "gpu",     label: "GPU",     pct: gpuLimit,     tone: gpuLimit > 25 ? "red" : gpuLimit > 10 ? "" : "green",
+      note: `${r.gpu.name} tops out at ${fmt(Math.round(r.gpuFps))} fps here.` },
+    { key: "vram",    label: "VRAM",    pct: vramLimit,    tone: r.vram.state === "over" ? "red" : r.vram.state === "tight" ? "" : "green",
+      note: `${r.vram.required.toFixed(1)} GB needed / ${r.gpu.vram} GB available${r.vram.overflow > 0 ? ` — ${r.vram.overflow.toFixed(1)} GB spilling into system RAM` : ""}.` },
+    { key: "ram",     label: "System RAM", pct: ramLimit,  tone: ramLimit > 12 ? "red" : ramLimit > 0 ? "" : "green",
+      note: `${S.ramGb} GB ${r.ram.speedLabel}. ${r.ram.note}` },
+    { key: "storage", label: "Storage", pct: storageLimit, tone: storageLimit > 35 ? "red" : storageLimit > 15 ? "" : "green",
+      note: `${st.label} — ${fmt(st.mbps)} MB/s sequential, ${st.random} MB/s random.` }
+  ];
+
+  document.getElementById("pills").innerHTML = parts.map(p => `
+    <div class="pf-stat">
+      <div class="pf-stat-label">${p.label} bottleneck</div>
+      <div class="pf-stat-value ${p.tone === "red" ? "c-red" : p.tone === "green" ? "c-green" : "c-gold"}">${p.pct.toFixed(0)}<small>%</small></div>
+      <div class="pf-bar ${p.tone === "red" ? "red" : p.tone === "green" ? "green" : ""}"><i data-w="${p.pct}"></i></div>
+      <div class="pf-stat-note">${p.note}</div>
+    </div>`).join("");
+  requestAnimationFrame(() => document.querySelectorAll("#pills .pf-bar > i").forEach(el => el.style.width = clamp(+el.dataset.w, 0, 100) + "%"));
+
+  /* ---- chart of the ceilings ------------------------------------------ */
+  document.getElementById("chart").innerHTML = sparkline(
+    [r.gpuFps, r.cpuFps, r.fps],
+    ["GPU ceiling", "CPU ceiling", "Actual<br>frame rate"], 2);
+  mountCharts(document.getElementById("chart"));
+
+  /* ---- table ----------------------------------------------------------- */
+  document.getElementById("table").innerHTML = `
+    <thead><tr><th>Subsystem</th><th>Limits you by</th><th>Detail</th></tr></thead>
+    <tbody>${parts.map(p => `<tr>
+      <td class="spec-label">${p.label}</td>
+      <td><span class="pf-chip ${p.tone === "red" ? "red" : p.tone === "green" ? "green" : "gold"}">${p.pct.toFixed(0)}%</span></td>
+      <td>${p.note}</td></tr>`).join("")}</tbody>`;
+
+  /* ---- narrative ------------------------------------------------------- */
+  const worst = [...parts].sort((a, b) => b.pct - a.pct)[0];
+  const runners = parts.filter(p => p.pct >= worst.pct * 0.75 && p !== worst).map(p => p.label);
+  document.getElementById("summary").innerHTML = `
+    <b>Verdict:</b> in ${r.game.name} at ${S.resolution} ${QUALITY[S.quality].label}${S.rt !== "off" ? " with " + RT_LEVELS[S.rt].label : ""},
+    your <b>${worst.label.toLowerCase()}</b> is the primary limit at <b>${worst.pct.toFixed(0)}%</b>, delivering
+    <b>${r.fps} fps</b>.
+    ${runners.length ? `${runners.join(" and ")} are close behind, so fixing only the first one will not unlock the full gain.` : "Nothing else is close — this is a clean, single bottleneck."}
+    ${r.vram.state === "over" ? `<br><br><b>VRAM is the quiet killer here.</b> ${r.vram.overflow.toFixed(1)} GB is spilling into system memory,
+      which costs ≈${Math.round((1 - r.vram.penalty) * 100)}% of your frames <i>and</i> causes the stutter that averages hide.
+      A card with more memory than ${r.gpu.vram} GB would fix both.` : ""}
+    ${r.bottleneck.kind === "cpu" && cpuLimit > 25 ? "<br><br>Being CPU-limited means a GPU upgrade would be wasted money at this resolution. Either upgrade the CPU or play at a higher resolution to shift the work back to the GPU." : ""}
+    ${storageLimit > 35 ? "<br><br>Your storage is slow enough to cause streaming hitches in this open-world title — move the install to an NVMe drive." : ""}`;
 }
 
-function resolutionLabel(r) {
-  if (r === "1080") return "1080p";
-  if (r === "1440") return "1440p";
-  if (r === "2160") return "4K";
-  if (r === "3440x1440") return "Ultrawide 3440×1440";
-  if (r === "8k") return "8K";
-  return r;
-}
+["cpu", "gpu", "game", "resolution", "quality", "rt", "ramSpeed", "storageType"].forEach(id =>
+  on(id, "change", () => { S[id] = val(id); run(); }));
+on("ramAmount", "change", () => { S.ramGb = num("ramAmount", 32); run(); });
+on("run", "click", () => { run(); toast("Bottlenecks analysed"); });
 
-function presetLabel(p) {
-  if (p === "low") return "Low";
-  if (p === "medium") return "Medium";
-  if (p === "high") return "High";
-  if (p === "ultra") return "Ultra";
-  if (p === "rt") return "Ray Tracing";
-  if (p === "pt") return "Path Tracing";
-  return p;
-}
-
-function buildSummary(cpu, gpu, ram, storage, game, res, preset,
-  cpuBottle, gpuBottle, ramBottle, vramBottle, storageBottle, primary) {
-
-  const primaryName =
-    primary.component === "cpu" ? "CPU" :
-    primary.component === "gpu" ? "GPU" :
-    primary.component === "ram" ? "RAM" :
-    primary.component === "vram" ? "VRAM" : "storage";
-
-  const resText = resolutionLabel(res);
-  const presetText = presetLabel(preset);
-
-  let primarySentence = `The primary bottleneck in this scenario is the ${primaryName}, at about ${primary.value.toFixed(0)}% severity.`;
-  if (primary.value < 25) {
-    primarySentence = `No single component is a strong bottleneck here — the system is well balanced.`;
-  }
-
-  const cpuText = `CPU bottleneck is estimated at ${cpuBottle.toFixed(0)}%, meaning ${cpuBottle > 50
-    ? "the processor can limit FPS in CPU-heavy scenes"
-    : "the processor has reasonable headroom for this GPU and game"}.`;
-
-  const gpuText = `GPU bottleneck is estimated at ${gpuBottle.toFixed(0)}%, indicating ${gpuBottle > 50
-    ? "the graphics card is the main limiter at this resolution and preset"
-    : "the GPU has some headroom, especially at lower resolutions or settings"}.`;
-
-  const ramText = `With ${ram.size} GB DDR5 at ${ram.speed} MHz, RAM bottleneck is around ${ramBottle.toFixed(0)}%, which is ${
-    ramBottle > 40 ? "noticeable in heavy multitasking or very demanding titles" : "unlikely to be a major issue in most games"
-  }.`;
-
-  const vramText = `VRAM bottleneck is about ${vramBottle.toFixed(0)}%, based on ${gpu.vram} GB on ${gpu.name} and the expected usage in ${game.name}. ${
-    vramBottle > 50
-      ? "High-resolution textures or ray tracing may cause stutter or streaming hitches."
-      : "Texture settings should be safe at this resolution."
-  }`;
-
-  const storageText = `Storage bottleneck is around ${storageBottle.toFixed(0)}% with ${storage.name}, mainly affecting load times and asset streaming rather than raw FPS.`;
-
-  return `
-    For ${game.name} at ${resText} using the ${presetText} preset, this configuration pairs ${cpu.name}
-    with ${gpu.name}, ${ram.size} GB DDR5 ${ram.speed} MHz and ${storage.name}. ${primarySentence}
-    ${cpuText} ${gpuText} ${ramText} ${vramText} ${storageText}
-  `.replace(/\s+/g, " ").trim();
-}
+run();
 </script>
-
 </body>
 </html>

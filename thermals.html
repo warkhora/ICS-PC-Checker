@@ -2,943 +2,173 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ICS Regent – Thermal & Cooling Simulator</title>
-
-<style>
-  body {
-    margin: 0;
-    padding: 40px;
-    background: linear-gradient(135deg, #050505, #000000);
-    color: #e6e6e6;
-    font-family: "Segoe UI", system-ui, sans-serif;
-  }
-
-  .ics-container {
-    max-width: 1100px;
-    margin: auto;
-    backdrop-filter: blur(18px);
-  }
-
-  .ics-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .ics-logo {
-    font-size: 32px;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    color: #ffd700;
-    font-weight: 600;
-  }
-
-  .ics-subtitle {
-    color: #bbb;
-    margin-top: 8px;
-    font-size: 15px;
-  }
-
-  .ics-frame {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 25px;
-    margin-bottom: 30px;
-    border-radius: 18px;
-    transition: 0.3s ease;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.08);
-  }
-
-  .ics-frame:hover {
-    border-color: rgba(255, 215, 0, 0.6);
-    box-shadow: 0 0 35px rgba(255, 215, 0, 0.25);
-    transform: translateY(-3px);
-  }
-
-  select, button, input {
-    width: 100%;
-    background: rgba(20, 20, 20, 0.85);
-    color: #eee;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    padding: 12px;
-    border-radius: 10px;
-    margin: 10px 0;
-    transition: 0.2s;
-    font-size: 15px;
-    backdrop-filter: blur(12px);
-    box-sizing: border-box;
-  }
-
-  select:hover, button:hover, input:hover {
-    border-color: #ffd700;
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
-  }
-
-  select option {
-    background: #111;
-    color: #eee;
-  }
-
-  button {
-    cursor: pointer;
-    background: rgba(255, 215, 0, 0.15);
-    font-weight: 600;
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .row-3 {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .ics-nav {
-    width: 100%;
-    background: rgba(0,0,0,0.65);
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    padding: 16px 24px;
-    display: flex;
-    gap: 30px;
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    backdrop-filter: blur(12px);
-    margin: -40px -40px 40px -40px;
-  }
-
-  .ics-nav a {
-    color: #ffd700;
-    text-decoration: none;
-    font-size: 16px;
-    letter-spacing: 1px;
-    transition: 0.25s ease;
-    padding-bottom: 4px;
-  }
-
-  .ics-nav a:hover {
-    color: white;
-    text-shadow: 0 0 10px #ffd700;
-  }
-
-  .ics-nav a.active {
-    color: white;
-    border-bottom: 2px solid #ffd700;
-    text-shadow: 0 0 12px #ffd700;
-  }
-
-  /* ▼ MORE MENU DROPDOWN */
-.nav-more {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.nav-more-btn {
-  color: #ffd700;
-  cursor: pointer;
-  font-size: 16px;
-  letter-spacing: 1px;
-  padding-bottom: 4px;
-  transition: 0.25s ease;
-}
-
-.nav-more-btn:hover {
-  color: white;
-  text-shadow: 0 0 10px #ffd700;
-}
-
-.nav-more-menu {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 14px;
-  padding: 10px;
-  width: 220px;
-  display: none;
-  flex-direction: column;
-  box-shadow: 0 0 25px rgba(255,215,0,0.15);
-  z-index: 9999;
-}
-
-.nav-more-menu a {
-  color: #ffd700;
-  text-decoration: none;
-  padding: 8px 10px;
-  border-radius: 10px;
-  transition: 0.25s ease;
-  display: block;
-  font-size: 14px;
-}
-
-.nav-more-menu a:hover {
-  background: rgba(255,255,255,0.08);
-  color: white;
-  text-shadow: 0 0 10px #ffd700;
-}
-
-  .tag {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    margin-right: 6px;
-    border: 1px solid rgba(255,255,255,0.2);
-  }
-
-  .tag-info { color: #7dd3fc; border-color: #0ea5e9; }
-
-  .section-title {
-    font-size: 15px;
-    font-weight: 600;
-    margin-top: 18px;
-    margin-bottom: 6px;
-    color: #f5f5f5;
-  }
-
-  .result-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-    margin-top: 10px;
-  }
-
-  .result-pill {
-    background: rgba(0,0,0,0.7);
-    border-radius: 14px;
-    padding: 12px 14px;
-    border: 1px solid rgba(255,255,255,0.18);
-    font-size: 13px;
-  }
-
-  .result-label {
-    font-weight: 600;
-    color: #ffd700;
-    margin-bottom: 4px;
-  }
-
-  .result-value {
-    font-size: 18px;
-    font-weight: 700;
-  }
-
-  .note {
-    font-size: 12px;
-    color: #cfcfcf;
-    margin-top: 4px;
-  }
-
-  .bar-outer {
-    width: 100%;
-    height: 26px;
-    border-radius: 999px;
-    background: rgba(0,0,0,0.85);
-    border: 1px solid rgba(255,255,255,0.18);
-    overflow: hidden;
-    position: relative;
-    margin-top: 6px;
-  }
-
-  .bar-inner {
-    height: 100%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #00ff9d, #ffd700, #ff4b4b);
-    transition: width 0.4s ease;
-  }
-
-  .bar-label {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 600;
-    text-shadow: 0 0 6px rgba(0,0,0,0.9);
-  }
-
-  .temp-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    font-size: 13px;
-  }
-
-  .temp-table th {
-    background: rgba(0,0,0,0.85);
-    padding: 10px;
-    border-bottom: 2px solid rgba(255,255,255,0.18);
-    text-align: left;
-  }
-
-  .temp-table td {
-    padding: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .ai-summary {
-    margin-top: 10px;
-    font-size: 13px;
-    color: #d0d0d0;
-    line-height: 1.6;
-  }
-
-  .small-label {
-    font-size: 12px;
-    color: #ccc;
-  }
-
-  .pill-inline {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.2);
-    font-size: 11px;
-    margin-right: 6px;
-    margin-top: 4px;
-  }
-
-  @media (max-width: 900px) {
-    .row, .row-3, .result-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thermal &amp; Cooling Simulator — PCFORGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/theme.css">
 </head>
 <body>
 
-<div class="ics-nav">
-  <a href="index.html" class="nav-link" data-page="index">CPU/GPU Comparison</a>
-  <a href="fps.html" class="nav-link" data-page="fps">FPS Estimator</a>
-  <a href="canyourunit.html" class="nav-link" data-page="canyourunit">Can You Run It?</a>
-  <a href="build.html" class="nav-link" data-page="build">Build Your PC</a>
-  <a href="pclifetime.html" class="nav-link" data-page="pclifetime">PC Lifespan</a>
-  <a href="thermals.html" class="nav-link" data-page="thermals">Thermal & Cooling</a>
-  <a href="consumption.html" class="nav-link" data-page="consumption">Power Consumption</a>
-  <a href="storage.html" class="nav-link" data-page="storage">Storage & Load Times</a>
+<div class="pf-container">
 
-  <!-- ▼ NEW DROPDOWN BUTTON (INSIDE NAV!) -->
-  <div class="nav-more">
-    <span class="nav-more-btn">More ▼</span>
-    <div class="nav-more-menu">
-      <a href="bottleneck.html">Bottleneck Analyzer</a>
-      <a href="future1.html">Future Tool 1</a>
-      <a href="future2.html">Future Tool 2</a>
-      <a href="future3.html">Future Tool 3</a>
-      <a href="future4.html">Future Tool 4</a>
+  <header class="pf-hero">
+    <div class="pf-eyebrow">● Heat &amp; noise</div>
+    <h1>Thermal &amp; Cooling</h1>
+    <p>How hot does it actually get, will it throttle, and how loud will the room be?
+       CPU heat, GPU core, memory junction and case airflow all feed into one model.</p>
+  </header>
+
+  <section class="pf-card pf-card-hover reveal">
+    <h2><span class="ico">🌡</span> Cooling setup</h2>
+    <div class="pf-grid pf-grid-2">
+      <div><label class="pf-label" for="cpu">CPU</label><select id="cpu"></select></div>
+      <div><label class="pf-label" for="gpu">GPU</label><select id="gpu"></select></div>
     </div>
-  </div>
-</div>
-
-  <script>
-  const moreBtn = document.querySelector(".nav-more-btn");
-  const moreMenu = document.querySelector(".nav-more-menu");
-
-  moreBtn.addEventListener("click", () => {
-    moreMenu.style.display = moreMenu.style.display === "flex" ? "none" : "flex";
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".nav-more")) {
-      moreMenu.style.display = "none";
-    }
-  });
-</script>
-
-<script>
-  const current = window.location.pathname.split("/").pop().toLowerCase();
-  document.querySelectorAll(".nav-link").forEach(link => {
-    if (current.includes(link.getAttribute("data-page"))) {
-      link.classList.add("active");
-    }
-  });
-</script>
-
-<div class="ics-container">
-
-  <div class="ics-header">
-    <div class="ics-logo">ICS REGENT</div>
-    <div class="ics-subtitle">Thermal & Cooling Simulator — Game-Aware Temperature & Throttle Analysis</div>
-  </div>
-
-  <!-- INPUT FRAME -->
-  <div class="ics-frame">
-    <div class="tag tag-info">Thermals v2</div>
-    <h2 style="margin-top:10px;">Cooling Scenario</h2>
-    <p style="font-size:13px;color:#ccc;margin-bottom:14px;">
-      Define your CPU, GPU, case airflow, cooler and game scenario. The simulator estimates CPU/GPU temperatures,
-      VRAM stress, thermal headroom, noise and throttle risk under realistic gaming workloads.
-    </p>
-
-    <div class="row">
-      <div>
-        <label>CPU</label>
-        <select id="cpu"></select>
-      </div>
-      <div>
-        <label>GPU</label>
-        <select id="gpu"></select>
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>Case Airflow</label>
+    <div class="pf-grid pf-grid-2" style="margin-top:14px;">
+      <div><label class="pf-label" for="cooler">CPU cooler</label><select id="cooler"></select></div>
+      <div><label class="pf-label" for="airflow">Case airflow</label>
         <select id="airflow">
-          <option value="weak">Weak airflow (closed front, few fans)</option>
-          <option value="balanced" selected>Balanced airflow</option>
-          <option value="high">High airflow (mesh front, many fans)</option>
-        </select>
-      </div>
-      <div>
-        <label>CPU Cooler Type</label>
-        <select id="cooler">
-          <option value="stock">Stock / basic air cooler</option>
-          <option value="tower">Tower air cooler</option>
-          <option value="aio240">240mm AIO</option>
-          <option value="aio360">360mm AIO</option>
+          <option value="high">High — mesh front, 6+ fans</option>
+          <option value="balanced" selected>Balanced — solid front, 3–4 fans</option>
+          <option value="weak">Weak — sealed front, 1–2 fans</option>
         </select>
       </div>
     </div>
-
-    <div class="row">
-      <div>
-        <label>Ambient Temperature (°C)</label>
-        <input type="number" id="ambient" value="22">
-      </div>
-      <div>
-        <label>Workload Profile</label>
+    <div class="pf-grid pf-grid-3" style="margin-top:14px;">
+      <div><label class="pf-label" for="ambient">Room temperature (°C)</label><input type="number" id="ambient" value="22" min="10" max="45"></div>
+      <div><label class="pf-label" for="intensity">Workload</label>
         <select id="intensity">
-          <option value="gaming" selected>Gaming (mixed CPU/GPU)</option>
-          <option value="cpuheavy">CPU-heavy (rendering, compiling)</option>
-          <option value="gpuheavy">GPU-heavy (ray tracing, path tracing)</option>
+          <option value="gaming" selected>Gaming</option>
+          <option value="cpuheavy">CPU-heavy (render / compile)</option>
+          <option value="gpuheavy">GPU-heavy (path tracing, ML)</option>
+        </select>
+      </div>
+      <div><label class="pf-label" for="oc">Overclock / undervolt</label>
+        <select id="oc">
+          <option value="uv">Undervolted (−10% power)</option>
+          <option value="stock" selected>Stock</option>
+          <option value="oc">Overclocked (+15% power)</option>
         </select>
       </div>
     </div>
+    <button class="pf-btn" id="run">Simulate thermals</button>
+  </section>
 
-    <div class="section-title">Game Scenario</div>
-    <div class="row-3">
-      <div>
-        <label>Game</label>
-        <select id="game">
-          <option value="cyberpunk">Cyberpunk 2077</option>
-          <option value="gta6">GTA VI</option>
-          <option value="starfield">Starfield</option>
-          <option value="helldivers2">Helldivers 2</option>
-          <option value="rdr2">Red Dead Redemption 2</option>
-          <option value="cod">Call of Duty</option>
-          <option value="eldenring">Elden Ring</option>
-          <option value="fortnite">Fortnite</option>
-          <option value="msfs2024">Flight Simulator 2024</option>
-          <option value="bg3">Baldur's Gate 3</option>
-          <option value="witcher4">The Witcher 4 (future)</option>
-          <option value="fh5">Forza Horizon 5</option>
-          <option value="fh6" selected>Forza Horizon 6</option>
-        </select>
-      </div>
-      <div>
-        <label>Graphics Preset</label>
-        <select id="preset">
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="ultra">Ultra</option>
-          <option value="rt">Ray Tracing</option>
-          <option value="pt">Path Tracing</option>
-        </select>
-      </div>
-      <div>
-        <label>Resolution</label>
-        <select id="resolution">
-          <option value="1080">1080p</option>
-          <option value="1440" selected>1440p</option>
-          <option value="2160">4K</option>
-          <option value="3440x1440">Ultrawide 3440×1440</option>
-          <option value="8k">8K (extreme)</option>
-        </select>
-      </div>
-    </div>
-
-    <button onclick="simulateThermals()">Simulate Thermals</button>
-  </div>
-
-  <!-- RESULT FRAME -->
-  <div class="ics-frame" id="resultFrame" style="display:none;">
-    <h2>Thermal Outcome & Stability</h2>
-
-    <div class="small-label" id="scenarioLabel"></div>
-
-    <div class="result-grid">
-      <div class="result-pill">
-        <div class="result-label">CPU Temperature</div>
-        <div class="result-value" id="cpuTempLabel"></div>
-        <div class="bar-outer">
-          <div class="bar-inner" id="cpuTempBar"></div>
-          <div class="bar-label" id="cpuTempBarLabel"></div>
-        </div>
-        <div class="note" id="cpuTempNote"></div>
-      </div>
-
-      <div class="result-pill">
-        <div class="result-label">GPU Temperature</div>
-        <div class="result-value" id="gpuTempLabel"></div>
-        <div class="bar-outer">
-          <div class="bar-inner" id="gpuTempBar"></div>
-          <div class="bar-label" id="gpuTempBarLabel"></div>
-        </div>
-        <div class="note" id="gpuTempNote"></div>
-      </div>
-
-      <div class="result-pill">
-        <div class="result-label">VRAM & Throttle / Noise</div>
-        <div class="result-value" id="throttleLabel"></div>
-        <div class="bar-outer">
-          <div class="bar-inner" id="headroomBar"></div>
-          <div class="bar-label" id="headroomBarLabel"></div>
-        </div>
-        <div class="note" id="noiseNote"></div>
-        <div class="note" id="vramNote"></div>
-      </div>
-    </div>
-
-    <div class="section-title">Temperature Curve (Estimated)</div>
-    <table class="temp-table" id="tempTable"></table>
-
-    <div class="section-title">Cooling Narrative</div>
-    <div class="ai-summary" id="coolingSummary"></div>
-  </div>
+  <section class="pf-card reveal">
+    <h2><span class="ico">📊</span> Results</h2>
+    <div class="pf-grid pf-grid-2" id="temps"></div>
+    <div class="pf-section-title">Detail</div>
+    <div class="pf-scroll"><table class="pf-table" id="table"></table></div>
+    <div class="pf-summary" id="summary"></div>
+  </section>
 
 </div>
 
+<script src="assets/data.js"></script>
+<script src="assets/engine.js"></script>
 <script>
-// =========================
-// CPU DATABASE
-// =========================
-const cpuDb = [
-  // Intel 14th gen
-  { name: "Intel Core i5-14400F", tdp: 125, hotspot: 95 },
-  { name: "Intel Core i5-14600K", tdp: 165, hotspot: 100 },
-  { name: "Intel Core i7-14700K", tdp: 200, hotspot: 100 },
-  { name: "Intel Core i9-14900K", tdp: 250, hotspot: 105 },
+const S = { cpu: "9800x3d", gpu: "rtx5070", cooler: 2, airflow: "balanced", ambient: 22, intensity: "gaming", oc: "stock" };
 
-  // AMD Ryzen 9000 series
-  { name: "Ryzen 5 9600X", tdp: 120, hotspot: 95 },
-  { name: "Ryzen 7 9700X", tdp: 130, hotspot: 95 },
-  { name: "Ryzen 7 9800X3D", tdp: 140, hotspot: 90 },
-  { name: "Ryzen 9 9900X3D", tdp: 170, hotspot: 95 },
-  { name: "Ryzen 9 9950X3D", tdp: 190, hotspot: 95 },
+fillSelect(document.getElementById("cpu"), CPUS.filter(c => !c.integrated), { groupKey: "brand", value: S.cpu });
+fillSelect(document.getElementById("gpu"), GPUS, { groupKey: "brand", value: S.gpu, labelFn: g => `${g.name} — ${g.tdp} W` });
+fillSelect(document.getElementById("cooler"), COOLERS.map((c, i) => ({ id: i, name: `${c.name} — rated ${c.tdp} W` })), { value: 2 });
 
-  // Threadripper (workstation)
-  { name: "Threadripper 7960X", tdp: 270, hotspot: 95 },
-  { name: "Threadripper 7970X", tdp: 300, hotspot: 95 },
-  { name: "Threadripper 7980X", tdp: 350, hotspot: 95 },
+const AIRFLOW = { high: 0.87, balanced: 1.0, weak: 1.18 };
+const OC = { uv: 0.90, stock: 1.0, oc: 1.15 };
+const TJMAX = { AMD: 95, Intel: 100 };
 
-  // Intel Ultra series (fictional / ICS)
-  { name: "Intel Ultra 5", tdp: 140, hotspot: 100 },
-  { name: "Intel Ultra 7", tdp: 180, hotspot: 100 },
-  { name: "Intel Ultra 9", tdp: 230, hotspot: 105 }
-];
-
-// =========================
-// GPU DATABASE
-// =========================
-const gpuDb = [
-  // RTX 30 series
-  { name: "GeForce RTX 3050 6GB", tdp: 115, hotspot: 82, vram: 6, arch: "ampere" },
-  { name: "GeForce RTX 3050 8GB", tdp: 130, hotspot: 84, vram: 8, arch: "ampere" },
-  { name: "GeForce RTX 3060", tdp: 170, hotspot: 86, vram: 12, arch: "ampere" },
-  { name: "GeForce RTX 3060 Ti", tdp: 200, hotspot: 88, vram: 8, arch: "ampere" },
-  { name: "GeForce RTX 3070", tdp: 220, hotspot: 90, vram: 8, arch: "ampere" },
-  { name: "GeForce RTX 3070 Ti", tdp: 290, hotspot: 92, vram: 8, arch: "ampere" },
-  { name: "GeForce RTX 3080", tdp: 320, hotspot: 94, vram: 10, arch: "ampere" },
-  { name: "GeForce RTX 3080 Ti", tdp: 350, hotspot: 96, vram: 12, arch: "ampere" },
-  { name: "GeForce RTX 3090", tdp: 350, hotspot: 98, vram: 24, arch: "ampere" },
-
-  // RTX 40 series
-  { name: "GeForce RTX 4050", tdp: 115, hotspot: 82, vram: 8, arch: "ada" },
-  { name: "GeForce RTX 4060", tdp: 140, hotspot: 84, vram: 8, arch: "ada" },
-  { name: "GeForce RTX 4060 Ti", tdp: 160, hotspot: 86, vram: 8, arch: "ada" },
-  { name: "GeForce RTX 4070", tdp: 200, hotspot: 88, vram: 12, arch: "ada" },
-  { name: "GeForce RTX 4070 Super", tdp: 220, hotspot: 90, vram: 12, arch: "ada" },
-  { name: "GeForce RTX 4070 Ti", tdp: 285, hotspot: 92, vram: 12, arch: "ada" },
-  { name: "GeForce RTX 4070 Ti Super", tdp: 295, hotspot: 93, vram: 16, arch: "ada" },
-  { name: "GeForce RTX 4080", tdp: 320, hotspot: 94, vram: 16, arch: "ada" },
-  { name: "GeForce RTX 4080 Super", tdp: 340, hotspot: 95, vram: 16, arch: "ada" },
-  { name: "GeForce RTX 4080 Ti", tdp: 360, hotspot: 96, vram: 20, arch: "ada" },
-  { name: "GeForce RTX 4080 Ti Super", tdp: 380, hotspot: 97, vram: 20, arch: "ada" },
-  { name: "GeForce RTX 4090", tdp: 450, hotspot: 98, vram: 24, arch: "ada" },
-
-  // RTX 50 series (ICS enhanced)
-  { name: "GeForce RTX 5050", tdp: 140, hotspot: 82, vram: 8, arch: "blackwell" },
-  { name: "GeForce RTX 5060", tdp: 170, hotspot: 84, vram: 12, arch: "blackwell" },
-  { name: "GeForce RTX 5060 Ti 8GB", tdp: 190, hotspot: 86, vram: 8, arch: "blackwell" },
-  { name: "GeForce RTX 5060 Ti 16GB", tdp: 210, hotspot: 87, vram: 16, arch: "blackwell" },
-  { name: "GeForce RTX 5070", tdp: 240, hotspot: 89, vram: 16, arch: "blackwell" },
-  { name: "GeForce RTX 5070 Ti", tdp: 280, hotspot: 91, vram: 16, arch: "blackwell" },
-  { name: "GeForce RTX 5080", tdp: 340, hotspot: 94, vram: 20, arch: "blackwell" },
-  { name: "GeForce RTX 5090", tdp: 480, hotspot: 100, vram: 32, arch: "blackwell", cuda: 27000 },
-
-  // AMD Radeon 9000 series (fictional / ICS)
-  { name: "Radeon RX 9060", tdp: 220, hotspot: 92, vram: 12, arch: "rdna4" },
-  { name: "Radeon RX 9060 XT", tdp: 250, hotspot: 94, vram: 16, arch: "rdna4" },
-  { name: "Radeon RX 9070", tdp: 280, hotspot: 95, vram: 16, arch: "rdna4" },
-  { name: "Radeon RX 9070 XT", tdp: 320, hotspot: 96, vram: 20, arch: "rdna4" },
-
-  // AMD Radeon 7000 series
-  { name: "Radeon RX 7900", tdp: 260, hotspot: 92, vram: 20, arch: "rdna3" },
-  { name: "Radeon RX 7900 XT", tdp: 300, hotspot: 94, vram: 20, arch: "rdna3" },
-  { name: "Radeon RX 7900 XTX", tdp: 355, hotspot: 96, vram: 24, arch: "rdna3" }
-];
-
-// =========================
-// GAME / PRESET MODEL
-// =========================
-const gameDb = {
-  cyberpunk:   { baseGpu: 0.85, baseCpu: 0.65, vramHeavy: true, rtFriendly: true },
-  gta6:        { baseGpu: 0.8,  baseCpu: 0.7,  vramHeavy: true, rtFriendly: true },
-  starfield:   { baseGpu: 0.9,  baseCpu: 0.7,  vramHeavy: true, rtFriendly: true },
-  helldivers2: { baseGpu: 0.8,  baseCpu: 0.75, vramHeavy: false, rtFriendly: false },
-  rdr2:        { baseGpu: 0.75, baseCpu: 0.6,  vramHeavy: true, rtFriendly: false },
-  cod:         { baseGpu: 0.8,  baseCpu: 0.7,  vramHeavy: true, rtFriendly: true },
-  eldenring:   { baseGpu: 0.7,  baseCpu: 0.6,  vramHeavy: false, rtFriendly: false },
-  fortnite:    { baseGpu: 0.6,  baseCpu: 0.55, vramHeavy: false, rtFriendly: true },
-  msfs2024:    { baseGpu: 0.9,  baseCpu: 0.85, vramHeavy: true, rtFriendly: true },
-  bg3:         { baseGpu: 0.7,  baseCpu: 0.6,  vramHeavy: false, rtFriendly: false },
-  witcher4:    { baseGpu: 0.9,  baseCpu: 0.75, vramHeavy: true, rtFriendly: true },
-  fh5:         { baseGpu: 0.75, baseCpu: 0.6,  vramHeavy: true, rtFriendly: true },
-  fh6:         { baseGpu: 0.85, baseCpu: 0.65, vramHeavy: true, rtFriendly: true }
-};
-
-function presetMultiplier(preset) {
-  if (preset === "low")    return { gpu: 0.55, cpu: 0.55, vram: 0.5, rt: 0 };
-  if (preset === "medium") return { gpu: 0.7,  cpu: 0.6,  vram: 0.7, rt: 0.1 };
-  if (preset === "high")   return { gpu: 0.85, cpu: 0.7,  vram: 0.9, rt: 0.2 };
-  if (preset === "ultra")  return { gpu: 0.95, cpu: 0.8,  vram: 1.0, rt: 0.3 };
-  if (preset === "rt")     return { gpu: 1.05, cpu: 0.85, vram: 1.1, rt: 0.6 };
-  if (preset === "pt")     return { gpu: 1.15, cpu: 0.9,  vram: 1.2, rt: 0.9 };
-  return { gpu: 0.8, cpu: 0.7, vram: 1.0, rt: 0.2 };
+function tempTone(t, limit) {
+  if (t >= limit - 3) return "red";
+  if (t >= limit - 15) return "";
+  return "green";
 }
 
-function resolutionMultiplier(res) {
-  if (res === "1080")        return { gpu: 0.7, vram: 0.7 };
-  if (res === "1440")        return { gpu: 0.85, vram: 0.9 };
-  if (res === "2160")        return { gpu: 1.0, vram: 1.1 };
-  if (res === "3440x1440")   return { gpu: 0.95, vram: 1.0 };
-  if (res === "8k")          return { gpu: 1.25, vram: 1.4 };
-  return { gpu: 0.85, vram: 0.9 };
+function simulate() {
+  const cpu = cpuById(S.cpu), gpu = gpuById(S.gpu), cooler = COOLERS[S.cooler];
+  const air = AIRFLOW[S.airflow], oc = OC[S.oc], amb = S.ambient;
+
+  /* --- how hard is each part working? --- */
+  const load = {
+    gaming:   { cpu: 0.55, gpu: 0.95 },
+    cpuheavy: { cpu: 1.00, gpu: 0.15 },
+    gpuheavy: { cpu: 0.35, gpu: 1.00 }
+  }[S.intensity];
+
+  const cpuW = Math.round(cpu.ppt * load.cpu * oc);
+  const gpuW = Math.round(gpu.tdp * load.gpu * oc);
+
+  /* --- CPU: delta-T scales with the fraction of the cooler's rating --- */
+  const ratio = cpuW / Math.max(cooler.tdp, 1);
+  const cpuDelta = 85 * Math.pow(ratio, 0.85) * air + (cooler.type === "aio" ? -3 : 0);
+  const cpuTemp = Math.round(amb + cpuDelta);
+  const cpuLimit = TJMAX[cpu.brand] || 95;
+  const throttles = cpuTemp >= cpuLimit - 2;
+  const headroom = cpuLimit - cpuTemp;
+
+  /* --- GPU: modern cards target ~83 °C core, ~95–105 °C hotspot --- */
+  const gpuDelta = (28 + gpu.tdp * 0.062) * air * (load.gpu * 0.7 + 0.3);
+  const gpuTemp = Math.round(amb + gpuDelta);
+  const hotspot = Math.round(gpuTemp + 16);
+  const memTemp = Math.round(gpuTemp + (gpu.vramType === "GDDR7" || gpu.vramType === "GDDR6X" ? 22 : 14));
+  const gpuThrottles = gpuTemp >= 84 || memTemp >= 105;
+
+  /* --- noise --- */
+  const fanRpm = clamp(0.35 + ratio * 0.65 + (S.airflow === "weak" ? 0.15 : 0), 0, 1.4);
+  const noise = Math.round(cooler.noise + fanRpm * 8 + (cooler.type === "aio" ? 2 : 0));
+
+  const rows = [
+    ["CPU package", `${cpuTemp} °C`, `Limit ${cpuLimit} °C`, `${headroom} °C of headroom`, tempTone(cpuTemp, cpuLimit)],
+    ["CPU power draw", `${cpuW} W`, `PPT ${cpu.ppt} W`, `${Math.round(cpuW / cpu.ppt * 100)}% of the package power limit`, "green"],
+    ["Cooler load", `${Math.round(ratio * 100)}%`, `Rated ${cooler.tdp} W`, ratio > 1 ? "Over the cooler's rating — it cannot keep up" : "Within the cooler's rating", ratio > 0.95 ? "red" : ratio > 0.75 ? "" : "green"],
+    ["GPU core", `${gpuTemp} °C`, "Target 83 °C", gpuTemp >= 83 ? "At the thermal target — clocks will back off" : "Comfortable", gpuTemp >= 83 ? "" : "green"],
+    ["GPU hotspot", `${hotspot} °C`, "Limit 105 °C", hotspot >= 105 ? "Hotspot limit reached — expect throttling" : "Normal", hotspot >= 100 ? "red" : hotspot >= 92 ? "" : "green"],
+    ["GPU memory junction", `${memTemp} °C`, "Limit 105 °C", memTemp >= 105 ? "Memory throttling — this silently caps frame rate" : "Normal", memTemp >= 100 ? "red" : memTemp >= 92 ? "" : "green"],
+    ["GPU power draw", `${gpuW} W`, `TGP ${gpu.tdp} W`, `${Math.round(gpuW / gpu.tdp * 100)}% of the board power`, "green"],
+    ["System noise", `≈${noise} dB(A)`, "—", noise > 45 ? "Clearly audible through a closed case" : noise > 36 ? "Audible but unobtrusive" : "Quiet", noise > 45 ? "red" : noise > 36 ? "" : "green"],
+    ["Case airflow", S.airflow, "—", S.airflow === "weak" ? "A sealed front panel adds roughly 15% to every delta-T" : S.airflow === "high" ? "Mesh front keeps intake air cool" : "Typical mid-tower behaviour", S.airflow === "weak" ? "red" : "green"]
+  ];
+
+  document.getElementById("temps").innerHTML = `
+    <div class="pf-stat">
+      <div class="pf-stat-label">CPU package temperature</div>
+      <div class="pf-stat-value ${cpuTemp >= cpuLimit - 3 ? "c-red" : cpuTemp >= cpuLimit - 15 ? "c-orange" : "c-green"}">${cpuTemp}<small> °C</small></div>
+      <div class="pf-bar ${tempTone(cpuTemp, cpuLimit) === "red" ? "red" : tempTone(cpuTemp, cpuLimit) === "green" ? "green" : ""}"><i style="width:${clamp(cpuTemp / cpuLimit * 100, 0, 100)}%"></i></div>
+      <div class="pf-stat-note">${throttles ? `<b class="c-red">Throttling.</b> The CPU is at its ${cpuLimit} °C limit and will drop clocks.` : `${headroom} °C below the ${cpuLimit} °C limit — no throttling.`}</div>
+    </div>
+    <div class="pf-stat">
+      <div class="pf-stat-label">GPU core temperature</div>
+      <div class="pf-stat-value ${gpuTemp >= 83 ? "c-orange" : gpuTemp >= 75 ? "c-gold" : "c-green"}">${gpuTemp}<small> °C</small></div>
+      <div class="pf-bar ${gpuTemp >= 83 ? "red" : gpuTemp >= 75 ? "" : "green"}"><i style="width:${clamp(gpuTemp / 95 * 100, 0, 100)}%"></i></div>
+      <div class="pf-stat-note">Hotspot ${hotspot} °C · memory junction ${memTemp} °C${gpuThrottles ? " — <b class='c-red'>throttling</b>" : ""}</div>
+    </div>`;
+
+  document.getElementById("table").innerHTML = `
+    <thead><tr><th>Metric</th><th>Value</th><th>Limit / rated</th><th>Assessment</th></tr></thead>
+    <tbody>${rows.map(([a, b, c, d, tone]) => `<tr>
+      <td class="spec-label">${a}</td>
+      <td><b class="${tone === "red" ? "c-red" : tone === "green" ? "c-green" : ""}">${b}</b></td>
+      <td class="c-dim">${c}</td><td>${d}</td></tr>`).join("")}</tbody>`;
+
+  const fpsImpact = throttles ? 12 : headroom < 8 ? 5 : gpuThrottles ? 8 : 0;
+  document.getElementById("summary").innerHTML = `
+    <b>Bottom line.</b> At ${amb} °C ambient with ${S.airflow} airflow, the ${cpu.name} settles at <b>${cpuTemp} °C</b> on the
+    ${cooler.name} and the ${gpu.name} at <b>${gpuTemp} °C</b> core / <b>${memTemp} °C</b> memory junction.
+    ${throttles ? `<b class="c-red">The CPU is throttling</b> — you are losing roughly ${fpsImpact}% of the performance you paid for. A bigger cooler or an undervolt is the fix.`
+      : gpuThrottles ? `<b class="c-orange">The GPU is hitting its thermal target</b>, which costs about ${fpsImpact}% in sustained play. More intake airflow helps more than a CPU cooler upgrade.`
+      : `Nothing throttles. You have ${headroom} °C of CPU headroom, so there is room for a warmer room or a mild overclock.`}
+    <br><br><b>Noise:</b> about ${noise} dB(A) — ${noise > 45 ? "loud enough to notice over game audio" : noise > 36 ? "audible in a quiet room" : "effectively silent at your desk"}.
+    ${S.airflow === "weak" ? "A mesh front panel and two extra intake fans is the single cheapest improvement available to you: it typically removes 4–6 °C from both CPU and GPU." : ""}
+    ${ratio > 0.9 && !throttles ? "Your cooler is already near its rated limit — the next CPU you buy will need a bigger one." : ""}`;
 }
 
-// =========================
-// POPULATE SELECTS
-// =========================
-function populateThermalSelects() {
-  const cpuSel = document.getElementById("cpu");
-  const gpuSel = document.getElementById("gpu");
+["cpu", "gpu", "airflow", "intensity", "oc"].forEach(id => on(id, "change", () => { S[id] = val(id); simulate(); }));
+on("cooler", "change", () => { S.cooler = num("cooler", 2); simulate(); });
+on("ambient", "input", () => { S.ambient = num("ambient", 22); simulate(); });
+on("run", "click", () => { simulate(); toast("Thermals simulated"); });
 
-  cpuDb.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.name;
-    opt.textContent = c.name;
-    cpuSel.appendChild(opt);
-  });
-
-  gpuDb.forEach(g => {
-    const opt = document.createElement("option");
-    opt.value = g.name;
-    opt.textContent = g.name;
-    gpuSel.appendChild(opt);
-  });
-
-  cpuSel.value = "Ryzen 7 9800X3D";
-  gpuSel.value = "GeForce RTX 5080";
-}
-populateThermalSelects();
-
-// =========================
-// COOLING MODEL
-// =========================
-function coolerEfficiency(coolerType) {
-  if (coolerType === "stock")  return 0.55;
-  if (coolerType === "tower")  return 0.75;
-  if (coolerType === "aio240") return 0.85;
-  if (coolerType === "aio360") return 0.92;
-  return 0.7;
-}
-
-function airflowModifier(airflow) {
-  if (airflow === "weak")     return 0.85;
-  if (airflow === "balanced") return 1.0;
-  if (airflow === "high")     return 1.1;
-  return 1.0;
-}
-
-function intensityLoad(intensity) {
-  if (intensity === "gaming")   return { cpu: 0.65, gpu: 0.8 };
-  if (intensity === "cpuheavy") return { cpu: 0.95, gpu: 0.4 };
-  if (intensity === "gpuheavy") return { cpu: 0.5,  gpu: 0.98 };
-  return { cpu: 0.7, gpu: 0.7 };
-}
-
-// Rough temp model: T = ambient + (tdp * load / (eff * airflowFactor * 4))
-function estimateTemp(ambient, tdp, load, eff, airflowFactor) {
-  const delta = (tdp * load) / (eff * airflowFactor * 4);
-  return ambient + delta;
-}
-
-// =========================
-// VRAM USAGE MODEL
-// =========================
-function estimateVramUsage(gameKey, preset, res, gpu) {
-  const game = gameDb[gameKey];
-  const pMul = presetMultiplier(preset);
-  const rMul = resolutionMultiplier(res);
-
-  let base = game.vramHeavy ? 8 : 5; // GB baseline
-  if (gameKey === "msfs2024") base = 10;
-  if (gameKey === "fh6") base += 1;
-  if (preset === "ultra" || preset === "rt" || preset === "pt") base += 2;
-
-  let usage = base * pMul.vram * rMul.vram;
-  if (preset === "pt") usage += 2;
-  if (res === "8k") usage += 3;
-
-  // clamp to GPU VRAM
-  const used = Math.min(usage, gpu.vram);
-  const headroom = Math.max(0, gpu.vram - used);
-  return { used: Math.round(used * 10) / 10, headroom: Math.round(headroom * 10) / 10 };
-}
-
-// =========================
-// MAIN SIMULATION
-// =========================
-function simulateThermals() {
-  const cpuName = document.getElementById("cpu").value;
-  const gpuName = document.getElementById("gpu").value;
-  const airflow = document.getElementById("airflow").value;
-  const cooler = document.getElementById("cooler").value;
-  const ambient = Number(document.getElementById("ambient").value || 22);
-  const intensity = document.getElementById("intensity").value;
-
-  const gameKey = document.getElementById("game").value;
-  const preset = document.getElementById("preset").value;
-  const res = document.getElementById("resolution").value;
-
-  const cpu = cpuDb.find(c => c.name === cpuName);
-  const gpu = gpuDb.find(g => g.name === gpuName);
-  const game = gameDb[gameKey];
-
-  const eff = coolerEfficiency(cooler);
-  const airMod = airflowModifier(airflow);
-  const baseLoad = intensityLoad(intensity);
-  const pMul = presetMultiplier(preset);
-  const rMul = resolutionMultiplier(res);
-
-  // Game-aware loads
-  const cpuLoad = Math.min(1.0, baseLoad.cpu * game.baseCpu * pMul.cpu);
-  let gpuLoad = Math.min(1.2, baseLoad.gpu * game.baseGpu * pMul.gpu * rMul.gpu);
-
-  // Path tracing / RT extra load
-  if (preset === "rt" || preset === "pt") {
-    if (game.rtFriendly) {
-      gpuLoad *= 1.05;
-    } else {
-      gpuLoad *= 1.0;
-    }
-  }
-
-  // RTX 5090 can handle insane loads more efficiently
-  if (gpu.name === "GeForce RTX 5090") {
-    gpuLoad *= 0.9;
-  }
-
-  const cpuTemp = estimateTemp(ambient, cpu.tdp, cpuLoad, eff, airMod);
-  const gpuTemp = estimateTemp(ambient, gpu.tdp, gpuLoad, 0.9, airMod);
-
-  const cpuTempRounded = Math.round(cpuTemp);
-  const gpuTempRounded = Math.round(gpuTemp);
-
-  const cpuHeadroom = Math.max(0, cpu.hotspot - cpuTempRounded);
-  const gpuHeadroom = Math.max(0, gpu.hotspot - gpuTempRounded);
-
-  // Throttle risk
-  let throttleRisk = "Low";
-  let headroomScore = (cpuHeadroom + gpuHeadroom) / 2;
-  if (cpuTempRounded > cpu.hotspot - 5 || gpuTempRounded > gpu.hotspot - 5) {
-    throttleRisk = "High";
-  } else if (cpuTempRounded > cpu.hotspot - 10 || gpuTempRounded > gpu.hotspot - 10) {
-    throttleRisk = "Moderate";
-  }
-
-  // Noise estimate
-  let noiseNote = "Fans will stay relatively quiet under this load.";
-  if (throttleRisk === "Moderate") {
-    noiseNote = "Fans will ramp up noticeably under sustained load.";
-  } else if (throttleRisk === "High") {
-    noiseNote = "Expect high fan speeds and noticeable noise to keep temperatures in check.";
-  }
-
-  // VRAM usage
-  const vramStats = estimateVramUsage(gameKey, preset, res, gpu);
-  let vramNote = `Estimated VRAM usage: ~${vramStats.used}GB out of ${gpu.vram}GB.`;
-  if (vramStats.headroom < 1) {
-    vramNote += " Very little headroom — expect stutters or streaming hitches in heavy scenes.";
-  } else if (vramStats.headroom < 3) {
-    vramNote += " Limited headroom — some heavy scenes may push close to the limit.";
-  } else {
-    vramNote += " Healthy headroom for this scenario.";
-  }
-
-  // Update main result frame
-  document.getElementById("resultFrame").style.display = "block";
-
-  const scenarioLabel = `
-    Scenario: ${gameNameLabel(gameKey)} @ ${resolutionLabel(res)}, ${presetLabel(preset)} preset
-    on ${cpu.name} + ${gpu.name} in ${airflowLabel(airflow)}, cooled by ${coolerLabel(cooler)}.
-  `.replace(/\s+/g, " ").trim();
-  document.getElementById("scenarioLabel").textContent = scenarioLabel;
-
-  // CPU temp UI
-  document.getElementById("cpuTempLabel").textContent = cpuTempRounded + "°C";
-  const cpuPercent = Math.min(100, Math.max(0, (cpuTempRounded / cpu.hotspot) * 100));
-  document.getElementById("cpuTempBar").style.width = cpuPercent + "%";
-  document.getElementById("cpuTempBarLabel").textContent = cpuPercent.toFixed(0) + "% of thermal limit";
-
-  let cpuNote = "Comfortable temperature for sustained workloads.";
-  if (cpuPercent > 85) cpuNote = "Close to thermal limit — may throttle in long sessions.";
-  else if (cpuPercent > 75) cpuNote = "Warm under load, but generally acceptable.";
-  document.getElementById("cpuTempNote").textContent = cpuNote;
-
-  // GPU temp UI
-  document.getElementById("gpuTempLabel").textContent = gpuTempRounded + "°C";
-  const gpuPercent = Math.min(100, Math.max(0, (gpuTempRounded / gpu.hotspot) * 100));
-  document.getElementById("gpuTempBar").style.width = gpuPercent + "%";
-  document.getElementById("gpuTempBarLabel").textContent = gpuPercent.toFixed(0) + "% of thermal limit";
-
-  let gpuNote = "GPU temperature is within a healthy range.";
-  if (gpuPercent > 85) gpuNote = "Close to thermal limit — may boost less or throttle.";
-  else if (gpuPercent > 75) gpuNote = "Warm under load, typical for high-end GPUs.";
-  document.getElementById("gpuTempNote").textContent = gpuNote;
-
-  // Throttle & headroom UI
-  document.getElementById("throttleLabel").textContent = throttleRisk + " throttle risk";
-  const headroomPercent = Math.max(0, Math.min(100, (headroomScore / 30) * 100));
-  document.getElementById("headroomBar").style.width = headroomPercent + "%";
-  document.getElementById("headroomBarLabel").textContent = headroomPercent.toFixed(0) + "% thermal headroom";
-  document.getElementById("noiseNote").textContent = noiseNote;
-  document.getElementById("vramNote").textContent = vramNote;
-
-  // Temperature curve table (idle / gaming / heavy)
-  const idleCpu = ambient + (cpu.tdp * 0.15) / (eff * airMod * 4);
-  const idleGpu = ambient + (gpu.tdp * 0.1) / (0.9 * airMod * 4);
-
-  const gamingCpu = estimateTemp(ambient, cpu.tdp, Math.min(0.7, cpuLoad), eff, airMod);
-  const gamingGpu = estimateTemp(ambient, gpu.tdp, Math.min(0.85, gpuLoad), 0.9, airMod);
-
-  const heavyCpu = estimateTemp(ambient, cpu.tdp, Math.min(1.0, cpuLoad * 1.1), eff, airMod);
-  const heavyGpu = estimateTemp(ambient, gpu.tdp, Math.min(1.1, gpuLoad * 1.1), 0.9, airMod);
-
-  let rows = `
-    <tr>
-      <th>Scenario</th>
-      <th>CPU Temperature</th>
-      <th>GPU Temperature</th>
-    </tr>
-    <tr>
-      <td>Idle / Desktop</td>
-      <td>${Math.round(idleCpu)}°C</td>
-      <td>${Math.round(idleGpu)}°C</td>
-    </tr>
-    <tr>
-      <td>Gaming Load (${gameNameLabel(gameKey)})</td>
-      <td>${Math.round(gamingCpu)}°C</td>
-      <td>${Math.round(gamingGpu)}°C</td>
-    </tr>
-    <tr>
-      <td>Heavy / Stress</td>
-      <td>${Math.round(heavyCpu)}°C</td>
-      <td>${Math.round(heavyGpu)}°C</td>
-    </tr>
-  `;
-  document.getElementById("tempTable").innerHTML = rows;
-
-  // Cooling narrative
-  const intensityLabel =
-    intensity === "gaming"   ? "typical gaming workloads" :
-    intensity === "cpuheavy" ? "heavy CPU-bound workloads" :
-    "extreme GPU-bound workloads";
-
-  const summary = `
-    This thermal scenario combines ${cpu.name} and ${gpu.name} running ${gameNameLabel(gameKey)} at
-    ${resolutionLabel(res)} using the ${presetLabel(preset)} preset. Under ${intensityLabel}, the CPU is
-    expected to reach around ${cpuTempRounded}°C and the GPU around ${gpuTempRounded}°C, relative to their
-    typical hotspot limits of ${cpu.hotspot}°C and ${gpu.hotspot}°C. ${noiseNote} ${vramNote}
-  `.replace(/\s+/g, " ").trim();
-
-  document.getElementById("coolingSummary").textContent = summary;
-}
-
-// =========================
-// LABEL HELPERS
-// =========================
-function gameNameLabel(key) {
-  const map = {
-    cyberpunk: "Cyberpunk 2077",
-    gta6: "GTA VI",
-    starfield: "Starfield",
-    helldivers2: "Helldivers 2",
-    rdr2: "Red Dead Redemption 2",
-    cod: "Call of Duty",
-    eldenring: "Elden Ring",
-    fortnite: "Fortnite",
-    msfs2024: "Flight Simulator 2024",
-    bg3: "Baldur's Gate 3",
-    witcher4: "The Witcher 4",
-    fh5: "Forza Horizon 5",
-    fh6: "Forza Horizon 6"
-  };
-  return map[key] || key;
-}
-
-function presetLabel(p) {
-  if (p === "low") return "Low";
-  if (p === "medium") return "Medium";
-  if (p === "high") return "High";
-  if (p === "ultra") return "Ultra";
-  if (p === "rt") return "Ray Tracing";
-  if (p === "pt") return "Path Tracing";
-  return p;
-}
-
-function resolutionLabel(r) {
-  if (r === "1080") return "1080p";
-  if (r === "1440") return "1440p";
-  if (r === "2160") return "4K";
-  if (r === "3440x1440") return "Ultrawide 3440×1440";
-  if (r === "8k") return "8K";
-  return r;
-}
-
-function airflowLabel(a) {
-  if (a === "weak") return "a restricted, low-airflow case";
-  if (a === "balanced") return "a balanced airflow case";
-  if (a === "high") return "a high-airflow, mesh-front case";
-  return "a standard case";
-}
-
-function coolerLabel(c) {
-  if (c === "stock") return "a basic stock cooler";
-  if (c === "tower") return "a tower-style air cooler";
-  if (c === "aio240") return "a 240mm AIO liquid cooler";
-  if (c === "aio360") return "a 360mm AIO liquid cooler";
-  return "a standard cooler";
-}
+simulate();
 </script>
-
 </body>
 </html>
